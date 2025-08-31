@@ -119,7 +119,7 @@ function App() {
 
   // Ana menüde gösterilecek lig sıralamasını hesapla
   const calculateCurrentLeaguePosition = () => {
-    if (!club || !fixtureData[club.league]) return club.lig || 1;
+    if (!club || !fixtureData[club.league]) return club?.lig || 1;
     
     const leagueFixtures = fixtureData[club.league];
     const leagueTeams = turkishLeagues[club.league];
@@ -520,31 +520,38 @@ function App() {
       <ManagerSelectionModal 
         setShowManagerSelection={setShowManagerSelection}
         onManagerSelect={handleManagerSelect}
-        leagueName={club.league}
-        teamValue={club.kadro}
+        leagueName={club?.league}
+        teamValue={club?.kadro}
       />
     );
   }
 
   return (
     <div className="fc-container">
-      <div className="fc-header">
-        <div className="fc-title">FOOTBALL CHAIRMAN</div>
-        <div className="fc-ribbon">{club.name}</div>
-        <div className="fc-sub">{club.season} &nbsp;|&nbsp; {club.league} &nbsp;|&nbsp; {club.date}</div>
-      </div>
+      {!club ? (
+        <div style={{ textAlign: 'center', padding: '50px', color: '#fff' }}>
+          <div className="fc-title">Yükleniyor...</div>
+          <div className="fc-sub">Takım verileri yükleniyor</div>
+        </div>
+      ) : (
+        <>
+          <div className="fc-header">
+            <div className="fc-title">FOOTBALL CHAIRMAN</div>
+            <div className="fc-ribbon">{club.name}</div>
+            <div className="fc-sub">{club.season} &nbsp;|&nbsp; {club.league} &nbsp;|&nbsp; {club.date}</div>
+          </div>
 
-      <div className="fc-grid">
-        <button className="fc-card white" onClick={() => setShowFixture(true)}>
-          HF SONU<span className="big">{club.hfSonu}</span>
-        </button>
-        <button className="fc-card white" onClick={() => setShowStandings(true)}>
-          LİG<span className="big">{calculateCurrentLeaguePosition()}.</span>
-        </button>
-        <button className="fc-card white" onClick={() => setShowFinance(true)}>
-          PARA<span className="big" style={{ color: 'var(--win)' }}>{new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(club.money)}</span>
-        </button>
-      </div>
+          <div className="fc-grid">
+            <button className="fc-card white" onClick={() => setShowFixture(true)}>
+              HF SONU<span className="big">{club.hfSonu}</span>
+            </button>
+            <button className="fc-card white" onClick={() => setShowStandings(true)}>
+              LİG<span className="big">{calculateCurrentLeaguePosition()}.</span>
+            </button>
+            <button className="fc-card white" onClick={() => setShowFinance(true)}>
+              PARA<span className="big" style={{ color: 'var(--win)' }}>{new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(club.money)}</span>
+            </button>
+          </div>
 
       {showFixture && <FixtureModal 
         setShowFixture={setShowFixture} 
@@ -828,8 +835,12 @@ function App() {
       <div className="fc-grid" style={{ marginTop: '10px' }}>
         <button className="fc-card navy" onClick={() => setShowSquad(true)} style={{ cursor: 'pointer' }}>
           KADRO<br/>{(() => {
+            if (!club.squad || !club.squad.firstTeam || !club.squad.substitutes) {
+              return 'N/A';
+            }
             const allPlayers = [...club.squad.firstTeam, ...club.squad.substitutes];
-            const totalRating = allPlayers.reduce((sum, player) => sum + player.rating, 0);
+            if (allPlayers.length === 0) return 'N/A';
+            const totalRating = allPlayers.reduce((sum, player) => sum + (player.rating || 0), 0);
             return Math.round(totalRating / allPlayers.length);
           })()}
         </button>
@@ -944,35 +955,36 @@ function App() {
                   </button>
                 </div>
 
-      <div className="fc-dots">
-        {club.matchResults.length > 0 ? (
-          club.matchResults.map((result, idx) => (
-            <div key={idx} className="fc-dot" style={{ background: getResultColor(result) }}>
-              {typeof result === 'string' ? result : `${result.homeScore}-${result.awayScore}`}
-            </div>
-          ))
-        ) : (
-          <div style={{ textAlign: 'center', color: '#ccc', fontSize: '14px' }}>
-            Henüz maç oynanmadı
+                <div className="fc-dots">
+                  {club.matchResults.length > 0 ? (
+                    club.matchResults.map((result, idx) => (
+                      <div key={idx} className="fc-dot" style={{ background: getResultColor(result) }}>
+                        {typeof result === 'string' ? result : `${result.homeScore}-${result.awayScore}`}
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ textAlign: 'center', color: '#ccc', fontSize: '14px' }}>
+                      Henüz maç oynanmadı
+                    </div>
+                  )}
+                </div>
+
+                {showTrainingMenu && (
+                  <div className="fc-modal-backdrop">
+                    <TrainingMenu setShowTrainingMenu={setShowTrainingMenu} />
+                    <button
+                      className="fc-btn"
+                      style={{ position: 'absolute', top: '20px', right: '20px', background: 'red' }}
+                      onClick={() => setShowTrainingMenu(false)}
+                    >
+                      Kapat
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
-      </div>
-
-
-
-
-
-      {showTrainingMenu && (
-        <div className="fc-modal-backdrop">
-          <TrainingMenu setShowTrainingMenu={setShowTrainingMenu} />
-          <button
-            className="fc-btn"
-            style={{ position: 'absolute', top: '20px', right: '20px', background: 'red' }}
-            onClick={() => setShowTrainingMenu(false)}
-          >
-            Kapat
-          </button>
-        </div>
+        </>
       )}
     </div>
   );
