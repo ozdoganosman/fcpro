@@ -553,112 +553,125 @@ function App() {
             </button>
           </div>
 
-      {showFixture && <FixtureModal 
-        setShowFixture={setShowFixture} 
-        club={club} 
-        preSeasonFixtures={preSeasonFixtures}
-        fixtureData={fixtureData}
-        onShowSquad={(teamName) => {
-          setSelectedTeamForSquad(teamName);
-          setShowSquad(true);
-        }}
-      />}
-      {showStandings && <StandingsModal 
-        setShowStandings={setShowStandings} 
-        club={club} 
-        fixtureData={fixtureData}
-        turkishLeagues={turkishLeagues}
-        onShowSquad={(teamName) => {
-          setSelectedTeamForSquad(teamName);
-          setShowSquad(true);
-        }}
-      />}
-      {showFinance && <FinanceModal setShowFinance={setShowFinance} club={club} />}
-      {showSquad && <SquadModal 
-        setShowSquad={setShowSquad} 
-        club={club} 
-        selectedTeam={selectedTeamForSquad}
-        playerStats={playerStats}
-      />}
-      {showManagerDetail && <ManagerDetailModal 
-        setShowManagerDetail={setShowManagerDetail} 
-        selectedManager={selectedManager}
-        technicalStaff={technicalStaff}
-        onStaffHire={handleStaffHire}
-      />}
-      {showTrainingFacilities && <TrainingFacilitiesModal 
-        setShowTrainingFacilities={setShowTrainingFacilities}
-        club={club}
-        onUpgrade={handleTrainingUpgrade}
-      />}
-      {showYouthFacilities && <YouthFacilitiesModal 
-        setShowYouthFacilities={setShowYouthFacilities}
-        club={club}
-        onUpgrade={handleYouthUpgrade}
-        onShowYouthSquad={() => setShowYouthSquad(true)}
-      />}
-      {showYouthSquad && <YouthSquadModal 
-        setShowYouthSquad={setShowYouthSquad}
-        club={club}
-      />}
-      {showFanSatisfaction && <FanSatisfactionModal 
-        setShowFanSatisfaction={setShowFanSatisfaction}
-        club={club}
-        turkishLeagues={turkishLeagues}
-      />}
-      {showStadium && <StadiumModal 
-        setShowStadium={setShowStadium}
-        onShowFacilities={() => setShowStadiumFacilities(true)}
-        onShowTribuneUpgrade={(tribune) => {
-          setSelectedTribune(tribune);
-          setShowTribuneUpgrade(true);
-        }}
-        onShowPitchImprovement={() => setShowPitchImprovement(true)}
-      />}
-      {showPitchImprovement && <PitchImprovementModal 
-        setShowPitchImprovement={setShowPitchImprovement}
-        club={club}
-        onShowStadium={() => setShowStadium(true)}
-      />}
-      {showStadiumFacilities && <StadiumFacilitiesModal 
-        setShowStadiumFacilities={setShowStadiumFacilities}
-        onShowStadium={() => setShowStadium(true)}
-      />}
-      {showTribuneUpgrade && selectedTribune && <TribuneUpgradeModal 
-        setShowTribuneUpgrade={setShowTribuneUpgrade}
-        selectedTribune={selectedTribune}
-        club={club}
-      />}
-      {showMatchPlay && currentMatch && <MatchPlayModal 
-        setShowMatchPlay={setShowMatchPlay}
-        club={club}
-        matchData={currentMatch}
-        playerEnergies={playerEnergies}
-        setPlayerEnergies={setPlayerEnergies}
-                  onMatchEnd={(result) => {
-            console.log('Maç sonucu:', result);
-            
-            // Oyuncu istatistiklerini güncelle (hem lig hem hazırlık maçları için)
-            if (result.events) {
+          {showFixture && <FixtureModal 
+            setShowFixture={setShowFixture} 
+            club={club} 
+            preSeasonFixtures={preSeasonFixtures}
+            fixtureData={fixtureData}
+            onShowSquad={(teamName) => {
+              setSelectedTeamForSquad(teamName);
+              setShowSquad(true);
+            }}
+          />}
+          {showStandings && <StandingsModal 
+            setShowStandings={setShowStandings} 
+            club={club} 
+            fixtureData={fixtureData}
+            turkishLeagues={turkishLeagues}
+            onShowSquad={(teamName) => {
+              setSelectedTeamForSquad(teamName);
+              setShowSquad(true);
+            }}
+          />}
+          {showFinance && <FinanceModal setShowFinance={setShowFinance} club={club} />}
+          {showSquad && <SquadModal 
+            setShowSquad={setShowSquad} 
+            club={club} 
+            selectedTeam={selectedTeamForSquad}
+            playerStats={playerStats}
+          />}
+          {showManagerDetail && <ManagerDetailModal 
+            setShowManagerDetail={setShowManagerDetail} 
+            selectedManager={selectedManager}
+            technicalStaff={technicalStaff}
+            onStaffHire={handleStaffHire}
+          />}
+          {showTrainingFacilities && <TrainingFacilitiesModal 
+            setShowTrainingFacilities={setShowTrainingFacilities}
+            club={club}
+            onUpgrade={handleTrainingUpgrade}
+          />}
+          {showYouthFacilities && <YouthFacilitiesModal 
+            setShowYouthFacilities={setShowYouthFacilities}
+            club={club}
+            onUpgrade={handleYouthUpgrade}
+            onShowYouthSquad={() => setShowYouthSquad(true)}
+          />}
+          {showYouthSquad && <YouthSquadModal 
+            setShowYouthSquad={setShowYouthSquad}
+            club={club}
+          />}
+          {showFanSatisfaction && <FanSatisfactionModal 
+            setShowFanSatisfaction={setShowFanSatisfaction}
+            club={club}
+            turkishLeagues={turkishLeagues}
+          />}
+          {showStadium && <StadiumModal 
+            setShowStadium={setShowStadium}
+            onShowFacilities={() => setShowStadiumFacilities(true)}
+            onShowTribuneUpgrade={(tribune) => {
+              setSelectedTribune(tribune);
+              setShowTribuneUpgrade(true);
+            }}
+            onShowPitchImprovement={() => setShowPitchImprovement(true)}
+          />}
+          {showPitchImprovement && <PitchImprovementModal 
+            setShowPitchImprovement={setShowPitchImprovement}
+            club={club}
+            onShowStadium={() => setShowStadium(true)}
+          />}
+          {showStadiumFacilities && <StadiumFacilitiesModal 
+            setShowStadiumFacilities={setShowStadiumFacilities}
+            onShowStadium={() => setShowStadium(true)}
+          />}
+          {showTribuneUpgrade && <TribuneUpgradeModal 
+            setShowTribuneUpgrade={setShowTribuneUpgrade}
+            selectedTribune={selectedTribune}
+            club={club}
+          />}
+          {showMatchPlay && <MatchPlayModal 
+            setShowMatchPlay={setShowMatchPlay}
+            club={club}
+            matchData={currentMatch}
+            playerEnergies={playerEnergies}
+            setPlayerEnergies={setPlayerEnergies}
+            onMatchEnd={(result) => {
+              // Maç sonucunu işle
+              console.log('Maç sonucu:', result);
+              
+              // Oyuncu istatistiklerini güncelle
               const newPlayerStats = { ...playerStats };
               
               result.events.forEach(event => {
-                if (event.player) {
-                  const playerName = event.player.name || event.player;
-                  if (!newPlayerStats[playerName]) {
-                    newPlayerStats[playerName] = {
-                      goals: 0,
-                      assists: 0,
-                      yellowCards: 0,
-                      redCards: 0,
-                      injuries: []
-                    };
-                  }
-                  
-                  // Hazırlık maçlarında sadece sakatlıkları kaydet
-                  if (currentMatch.type === 'friendly') {
-                    if (event.type === 'injury') {
-                      const matchesOut = Math.floor(Math.random() * 10) + 1; // 1-10 maç
+                const playerName = event.player?.name || event.player;
+                
+                if (!newPlayerStats[playerName]) {
+                  newPlayerStats[playerName] = {
+                    goals: 0,
+                    assists: 0,
+                    yellowCards: 0,
+                    redCards: 0,
+                    injuries: []
+                  };
+                }
+                
+                switch (event.type) {
+                  case 'goal':
+                    newPlayerStats[playerName].goals++;
+                    break;
+                  case 'assist':
+                    newPlayerStats[playerName].assists++;
+                    break;
+                  case 'yellowCard':
+                    newPlayerStats[playerName].yellowCards++;
+                    break;
+                  case 'redCard':
+                    newPlayerStats[playerName].redCards++;
+                    break;
+                  case 'injury':
+                    // Sadece hazırlık maçlarında sakatlık kaydet
+                    if (currentMatch.type === 'friendly') {
+                      const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
                       newPlayerStats[playerName].injuries.push({
                         type: event.injuryType || 'Sakatlık',
                         matchesOut: matchesOut,
@@ -666,33 +679,7 @@ function App() {
                       });
                       console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
                     }
-                  } else {
-                    // Lig maçlarında tüm istatistikleri kaydet
-                    switch (event.type) {
-                      case 'goal':
-                        newPlayerStats[playerName].goals++;
-                        break;
-                      case 'assist':
-                        newPlayerStats[playerName].assists++;
-                        break;
-                      case 'yellow':
-                        newPlayerStats[playerName].yellowCards++;
-                        break;
-                      case 'red':
-                        newPlayerStats[playerName].redCards++;
-                        break;
-                      case 'injury': {
-                        const matchesOut = Math.floor(Math.random() * 10) + 1; // 1-10 maç
-                        newPlayerStats[playerName].injuries.push({
-                          type: event.injuryType || 'Sakatlık',
-                          matchesOut: matchesOut,
-                          week: gameTime.week
-                        });
-                        console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
-                        break;
-                      }
-                    }
-                  }
+                    break;
                 }
               });
               
@@ -870,120 +857,115 @@ function App() {
         </button>
       </div>
 
+      <div className="fc-grid" style={{ marginTop: '10px' }}>
+        <button
+          className="fc-card light"
+          onClick={() => setShowFanSatisfaction(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          TARAFTARLAR MUTLU MU?<br/><span style={{fontSize: '1.2em'}}>{club.taraftarMutlu}% MENAJER<br/>{club.baskanMutlu}% BAŞKAN</span>
+        </button>
+        <button
+          className="fc-card light"
+          onClick={() => setShowStadium(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          STADYUM<br/><span style={{fontSize: '1.2em'}}>🏟️</span>
+        </button>
+      </div>
 
+      {/* Zaman İlerletme Butonu */}
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <button
+          className="fc-card light"
+          onClick={() => {
+            if (currentMatch) {
+              setShowMatchPlay(true);
+            } else {
+              // Zaman ilerlet - advanceWeek fonksiyonunu kullan
+              const updatedClub = advanceWeek(club);
+              setClub(updatedClub);
+              setGameTime(updatedClub.gameTime);
+              
+              // Oyuncu enerjilerini güncelle (maç olmayan günlerde %5 artış)
+              setPlayerEnergies(prevEnergies => {
+                const newEnergies = { ...prevEnergies };
+                
+                // Tüm takımların oyuncularının enerjilerini güncelle
+                Object.keys(turkishLeagues).forEach(leagueName => {
+                  const teams = turkishLeagues[leagueName];
+                  teams.forEach(teamName => {
+                    const teamKey = `${leagueName}_${teamName}`;
+                    if (newEnergies[teamKey]) {
+                      newEnergies[teamKey] = newEnergies[teamKey].map(player => ({
+                        ...player,
+                        energy: Math.min(100, (player.energy || 100) + 5)
+                      }));
+                    }
+                  });
+                });
+                
+                return newEnergies;
+              });
+              
+              // Sakatlık sürelerini azalt
+              setPlayerStats(prevStats => {
+                const newStats = { ...prevStats };
+                
+                Object.keys(newStats).forEach(playerName => {
+                  if (newStats[playerName].injuries) {
+                    newStats[playerName].injuries = newStats[playerName].injuries.map(injury => ({
+                      ...injury,
+                      matchesOut: Math.max(0, injury.matchesOut - 1) // Her hafta 1 maç azalt
+                    }));
+                  }
+                });
+                
+                return newStats;
+              });
+            }
+          }}
+          style={{ 
+            cursor: 'pointer',
+            background: currentMatch ? 'var(--win)' : 'var(--green)',
+            color: 'white',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            padding: '15px 30px',
+            borderRadius: '8px',
+            border: 'none'
+          }}
+        >
+          {currentMatch ? `${currentMatch.awayTeam}` : 'Devam Et'}
+        </button>
+      </div>
 
-                      <div className="fc-grid" style={{ marginTop: '10px' }}>
-                  <button
-                    className="fc-card light"
-                    onClick={() => setShowFanSatisfaction(true)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    TARAFTARLAR MUTLU MU?<br/><span style={{fontSize: '1.2em'}}>{club.taraftarMutlu}% MENAJER<br/>{club.baskanMutlu}% BAŞKAN</span>
-                  </button>
-                  <button
-                    className="fc-card light"
-                    onClick={() => setShowStadium(true)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    STADYUM<br/><span style={{fontSize: '1.2em'}}>🏟️</span>
-                  </button>
-                </div>
-
-                {/* Zaman İlerletme Butonu */}
-                <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                  <button
-                    className="fc-card light"
-                    onClick={() => {
-                      if (currentMatch) {
-                        setShowMatchPlay(true);
-                      } else {
-                        // Zaman ilerlet - advanceWeek fonksiyonunu kullan
-                        const updatedClub = advanceWeek(club);
-                        setClub(updatedClub);
-                        setGameTime(updatedClub.gameTime);
-                        
-                                                  // Oyuncu enerjilerini güncelle (maç olmayan günlerde %5 artış)
-                          setPlayerEnergies(prevEnergies => {
-                            const newEnergies = { ...prevEnergies };
-                            
-                            // Tüm takımların oyuncularının enerjilerini güncelle
-                            Object.keys(turkishLeagues).forEach(leagueName => {
-                              const teams = turkishLeagues[leagueName];
-                              teams.forEach(teamName => {
-                                const teamKey = `${leagueName}_${teamName}`;
-                                if (newEnergies[teamKey]) {
-                                  newEnergies[teamKey] = newEnergies[teamKey].map(player => ({
-                                    ...player,
-                                    energy: Math.min(100, (player.energy || 100) + 5)
-                                  }));
-                                }
-                              });
-                            });
-                            
-                            return newEnergies;
-                          });
-                          
-                          // Sakatlık sürelerini azalt
-                          setPlayerStats(prevStats => {
-                            const newStats = { ...prevStats };
-                            
-                            Object.keys(newStats).forEach(playerName => {
-                              if (newStats[playerName].injuries) {
-                                newStats[playerName].injuries = newStats[playerName].injuries.map(injury => ({
-                                  ...injury,
-                                  matchesOut: Math.max(0, injury.matchesOut - 1) // Her hafta 1 maç azalt
-                                }));
-                              }
-                            });
-                            
-                            return newStats;
-                          });
-                      }
-                    }}
-                    style={{ 
-                      cursor: 'pointer',
-                      background: currentMatch ? 'var(--win)' : 'var(--green)',
-                      color: 'white',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      padding: '15px 30px',
-                      borderRadius: '8px',
-                      border: 'none'
-                    }}
-                  >
-                    {currentMatch ? `${currentMatch.awayTeam}` : 'Devam Et'}
-                  </button>
-                </div>
-
-                <div className="fc-dots">
-                  {club.matchResults.length > 0 ? (
-                    club.matchResults.map((result, idx) => (
-                      <div key={idx} className="fc-dot" style={{ background: getResultColor(result) }}>
-                        {typeof result === 'string' ? result : `${result.homeScore}-${result.awayScore}`}
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ textAlign: 'center', color: '#ccc', fontSize: '14px' }}>
-                      Henüz maç oynanmadı
-                    </div>
-                  )}
-                </div>
-
-                {showTrainingMenu && (
-                  <div className="fc-modal-backdrop">
-                    <TrainingMenu setShowTrainingMenu={setShowTrainingMenu} />
-                    <button
-                      className="fc-btn"
-                      style={{ position: 'absolute', top: '20px', right: '20px', background: 'red' }}
-                      onClick={() => setShowTrainingMenu(false)}
-                    >
-                      Kapat
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
+      <div className="fc-dots">
+        {club.matchResults.length > 0 ? (
+          club.matchResults.map((result, idx) => (
+            <div key={idx} className="fc-dot" style={{ background: getResultColor(result) }}>
+              {typeof result === 'string' ? result : `${result.homeScore}-${result.awayScore}`}
+            </div>
+          ))
+        ) : (
+          <div style={{ textAlign: 'center', color: '#ccc', fontSize: '14px' }}>
+            Henüz maç oynanmadı
           </div>
+        )}
+      </div>
+
+      {showTrainingMenu && (
+        <div className="fc-modal-backdrop">
+          <TrainingMenu setShowTrainingMenu={setShowTrainingMenu} />
+          <button
+            className="fc-btn"
+            style={{ position: 'absolute', top: '20px', right: '20px', background: 'red' }}
+            onClick={() => setShowTrainingMenu(false)}
+          >
+            Kapat
+          </button>
+        </div>
+      )}
         </>
       )}
     </div>
