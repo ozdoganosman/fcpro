@@ -157,16 +157,29 @@ const SquadModal = ({ setShowSquad, club, selectedTeam = null, playerStats = {} 
   };
 
   const renderStatsTab = () => {
+    // Sadece bu takımın oyuncularının istatistiklerini filtrele
+    const teamPlayerNames = allPlayers.map(player => player.name);
+    
     const playersWithCards = Object.entries(playerStats)
-      .filter(([, stats]) => stats.yellowCards > 0 || stats.redCards > 0)
+      .filter(([playerName, stats]) => 
+        teamPlayerNames.includes(playerName) && 
+        (stats.yellowCards > 0 || stats.redCards > 0)
+      )
       .sort((a, b) => (b[1].redCards * 2 + b[1].yellowCards) - (a[1].redCards * 2 + a[1].yellowCards));
 
     const injuredPlayers = Object.entries(playerStats)
-      .filter(([, stats]) => stats.injuries && stats.injuries.length > 0)
+      .filter(([playerName, stats]) => 
+        teamPlayerNames.includes(playerName) && 
+        stats.injuries && stats.injuries.length > 0 &&
+        stats.injuries.some(injury => injury.matchesOut > 0) // Sadece aktif sakatlıkları göster
+      )
       .sort((a, b) => b[1].injuries.length - a[1].injuries.length);
 
     const playersWithGoals = Object.entries(playerStats)
-      .filter(([, stats]) => (stats.goals > 0 || stats.assists > 0))
+      .filter(([playerName, stats]) => 
+        teamPlayerNames.includes(playerName) && 
+        (stats.goals > 0 || stats.assists > 0)
+      )
       .sort((a, b) => (b[1].goals * 3 + b[1].assists) - (a[1].goals * 3 + a[1].assists));
 
     return (
@@ -247,15 +260,15 @@ const SquadModal = ({ setShowSquad, club, selectedTeam = null, playerStats = {} 
                   <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
                     {playerName}
                   </div>
-                  {stats.injuries.map((injury, index) => (
-                    <div key={index} style={{ 
-                      marginBottom: '3px',
-                      fontSize: '13px',
-                      color: '#666'
-                    }}>
-                      • {injury.type} - {injury.matchesOut} maç yok
-                    </div>
-                  ))}
+                                     {stats.injuries.map((injury, index) => (
+                     <div key={index} style={{ 
+                       marginBottom: '3px',
+                       fontSize: '13px',
+                       color: '#666'
+                     }}>
+                       • {injury.type} - {injury.matchesOut} maç yok
+                     </div>
+                   )).filter((_, index) => stats.injuries[index].matchesOut > 0)} {/* Sadece aktif sakatlıkları göster */}
                 </div>
               ))}
             </div>
@@ -348,40 +361,93 @@ const SquadModal = ({ setShowSquad, club, selectedTeam = null, playerStats = {} 
     );
   };
 
-     const renderPlayerRow = (player) => (
-     <tr key={player.id}>
-       <td style={{ textAlign: 'left' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-           <div style={{ 
-             width: '24px', 
-             height: '24px', 
-             borderRadius: '50%', 
-             background: getPositionColor(player.position),
-             display: 'flex',
-             alignItems: 'center',
-             justifyContent: 'center',
-             fontSize: '10px',
-             fontWeight: 'bold',
-             color: '#fff'
-           }}>
-             {player.name.split(' ')[0][0]}
-           </div>
-           {player.name}
-         </div>
-       </td>
-       <td style={{ fontWeight: 'bold' }}>{player.rating}</td>
-       <td>
-         <div style={{ display: 'flex', gap: '4px' }}>
-           {renderFormFitnessMorale(player.form)}
-         </div>
-       </td>
-       <td>{player.age}</td>
-       <td style={{ fontWeight: 'bold', color: 'var(--blue)' }}>
-         {player.salary?.toLocaleString() || '0'} TL
-       </td>
-       <td>{player.contractEnd}</td>
-     </tr>
-   );
+     const renderPlayerRow = (player) => {
+       // Enerji rengini belirle
+       const getEnergyColor = (energy) => {
+         if (energy >= 80) return '#4CAF50'; // Yeşil
+         if (energy >= 60) return '#FF9800'; // Turuncu
+         if (energy >= 40) return '#FF5722'; // Kırmızı
+         return '#D32F2F'; // Koyu kırmızı
+       };
+       
+               // Sakat oyuncu kontrolü
+        const isInjured = playerStats[player.name] && 
+          playerStats[player.name].injuries && 
+          playerStats[player.name].injuries.some(injury => injury.matchesOut > 0);
+        
+        // Sakatlık süresini hesapla
+        const getInjuryStatus = () => {
+          if (!isInjured) return null;
+          
+          const activeInjuries = playerStats[player.name].injuries.filter(injury => injury.matchesOut > 0);
+          if (activeInjuries.length === 0) return null;
+          
+          // En uzun sakatlık süresini al
+          const maxMatchesOut = Math.max(...activeInjuries.map(injury => injury.matchesOut));
+          return `${maxMatchesOut} maç`;
+        };
+        
+        const injuryStatus = getInjuryStatus();
+       
+       return (
+         <tr key={player.id} style={{ 
+           opacity: isInjured ? 0.6 : 1,
+           background: isInjured ? '#fff3cd' : 'transparent'
+         }}>
+           <td style={{ textAlign: 'left' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+               <div style={{ 
+                 width: '24px', 
+                 height: '24px', 
+                 borderRadius: '50%', 
+                 background: getPositionColor(player.position),
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 fontSize: '10px',
+                 fontWeight: 'bold',
+                 color: '#fff'
+               }}>
+                 {player.name.split(' ')[0][0]}
+               </div>
+               <div>
+                                   {player.name}
+                  {isInjured && (
+                    <div style={{ 
+                      fontSize: '11px', 
+                      color: '#d63384', 
+                      fontWeight: 'bold',
+                      marginTop: '2px'
+                    }}>
+                      🏥 Sakat ({injuryStatus})
+                    </div>
+                  )}
+               </div>
+             </div>
+           </td>
+           <td style={{ fontWeight: 'bold' }}>{player.rating}</td>
+           <td>
+             <div style={{ display: 'flex', gap: '4px' }}>
+               {renderFormFitnessMorale(player.form)}
+             </div>
+           </td>
+           <td>
+             <span style={{ 
+               color: getEnergyColor(player.energy || 100), 
+               fontWeight: 'bold',
+               fontSize: '14px'
+             }}>
+                               {(Math.round((player.energy || 100) * 10) / 10).toFixed(1)}%
+             </span>
+           </td>
+           <td>{player.age}</td>
+           <td style={{ fontWeight: 'bold', color: 'var(--blue)' }}>
+             {player.salary?.toLocaleString() || '0'} TL
+           </td>
+           <td>{player.contractEnd}</td>
+         </tr>
+       );
+     };
 
   const getPositionColor = (position) => {
     const colors = {
@@ -412,6 +478,7 @@ const SquadModal = ({ setShowSquad, club, selectedTeam = null, playerStats = {} 
                      <th style={{ textAlign: 'left' }}>Oyuncu</th>
                      <th>Rey</th>
                      <th>Form/Fit/Mut</th>
+                     <th>Enerji</th>
                      <th>Yaş</th>
                      <th>Maaş</th>
                      <th>Söz Bit</th>

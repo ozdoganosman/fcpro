@@ -3,7 +3,8 @@ import {
   generateRandomAge, 
   generateContractEnd, 
   generateFormFitnessMorale,
-  calculatePlayerSalary
+  calculatePlayerSalary,
+  calculateEnergyLevel
 } from './turkishNames';
 
 // CSV'den takım değerini al ve oyuncu yeteneklerini hesapla
@@ -99,13 +100,15 @@ export const generateSquad = async (teamName, leagueName) => {
     
     const age = generateRandomAge();
     const salary = calculatePlayerSalary(rating, age, position, leagueName);
+    const form = generateFormFitnessMorale();
     
     firstTeam.push({
       id: `ft_${i}`,
       name: generateRandomName(),
       position: position,
       rating: rating,
-      form: generateFormFitnessMorale(),
+      form: form,
+      energy: calculateEnergyLevel(), // Başlangıç enerjisi %100
       age: age,
       contractEnd: generateContractEnd(),
       salary: salary,
@@ -123,13 +126,15 @@ export const generateSquad = async (teamName, leagueName) => {
     
     const age = generateRandomAge();
     const salary = calculatePlayerSalary(rating, age, position, leagueName);
+    const form = generateFormFitnessMorale();
     
     substitutes.push({
       id: `sub_${i}`,
       name: generateRandomName(),
       position: position,
       rating: rating,
-      form: generateFormFitnessMorale(),
+      form: form,
+      energy: calculateEnergyLevel(), // Başlangıç enerjisi %100
       age: age,
       contractEnd: generateContractEnd(),
       salary: salary,

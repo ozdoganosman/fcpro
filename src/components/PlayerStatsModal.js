@@ -6,6 +6,25 @@ import PropTypes from 'prop-types';
 const PlayerStatsModal = ({ setShowPlayerStats, club, playerStats }) => {
   const [activeTab, setActiveTab] = useState('cards'); // 'cards', 'injuries', 'goals'
 
+  // Sadece bu takımın oyuncularının istatistiklerini filtrele
+  const getTeamPlayerStats = () => {
+    // Club squad'dan oyuncu isimlerini al
+    const teamPlayerNames = club.squad ? 
+      [...club.squad.firstTeam, ...club.squad.substitutes].map(player => player.name) : [];
+    
+    // Sadece bu takımın oyuncularının istatistiklerini filtrele
+    const filteredStats = {};
+    Object.entries(playerStats).forEach(([playerName, stats]) => {
+      if (teamPlayerNames.includes(playerName)) {
+        filteredStats[playerName] = stats;
+      }
+    });
+    
+    return filteredStats;
+  };
+
+  const teamPlayerStats = getTeamPlayerStats();
+
   const renderTabs = () => (
     <div style={{ display: 'flex', marginBottom: '20px' }}>
       <button
@@ -57,7 +76,7 @@ const PlayerStatsModal = ({ setShowPlayerStats, club, playerStats }) => {
   );
 
   const renderCardsTab = () => {
-    const playersWithCards = Object.entries(playerStats)
+    const playersWithCards = Object.entries(teamPlayerStats)
       .filter(([playerName, stats]) => stats.yellowCards > 0 || stats.redCards > 0)
       .sort((a, b) => (b[1].redCards * 2 + b[1].yellowCards) - (a[1].redCards * 2 + a[1].yellowCards));
 
@@ -119,8 +138,9 @@ const PlayerStatsModal = ({ setShowPlayerStats, club, playerStats }) => {
   };
 
   const renderInjuriesTab = () => {
-    const injuredPlayers = Object.entries(playerStats)
-      .filter(([playerName, stats]) => stats.injuries && stats.injuries.length > 0)
+    const injuredPlayers = Object.entries(teamPlayerStats)
+      .filter(([playerName, stats]) => stats.injuries && stats.injuries.length > 0 &&
+        stats.injuries.some(injury => injury.matchesOut > 0)) // Sadece aktif sakatlıkları göster
       .sort((a, b) => b[1].injuries.length - a[1].injuries.length);
 
     return (
@@ -144,15 +164,15 @@ const PlayerStatsModal = ({ setShowPlayerStats, club, playerStats }) => {
                 <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
                   {playerName}
                 </div>
-                {stats.injuries.map((injury, index) => (
-                  <div key={index} style={{ 
-                    marginBottom: '5px',
-                    fontSize: '14px',
-                    color: '#666'
-                  }}>
-                                         • {injury.type} - {injury.matchesOut} maç yok
-                  </div>
-                ))}
+                                 {stats.injuries.map((injury, index) => (
+                   <div key={index} style={{ 
+                     marginBottom: '5px',
+                     fontSize: '14px',
+                     color: '#666'
+                   }}>
+                     • {injury.type} - {injury.matchesOut} maç yok
+                   </div>
+                 )).filter((_, index) => stats.injuries[index].matchesOut > 0)} {/* Sadece aktif sakatlıkları göster */}
               </div>
             ))}
           </div>
@@ -162,7 +182,7 @@ const PlayerStatsModal = ({ setShowPlayerStats, club, playerStats }) => {
   };
 
   const renderGoalsTab = () => {
-    const playersWithGoals = Object.entries(playerStats)
+    const playersWithGoals = Object.entries(teamPlayerStats)
       .filter(([playerName, stats]) => (stats.goals > 0 || stats.assists > 0))
       .sort((a, b) => (b[1].goals * 3 + b[1].assists) - (a[1].goals * 3 + a[1].assists));
 

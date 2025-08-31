@@ -113,6 +113,9 @@ function App() {
   // Oyuncu istatistikleri state'i
   const [playerStats, setPlayerStats] = useState({});
   const [currentMatchWeek, setCurrentMatchWeek] = useState(1);
+  
+  // Oyuncu enerjileri state'i (kalıcı)
+  const [playerEnergies, setPlayerEnergies] = useState({});
 
   // Ana menüde gösterilecek lig sıralamasını hesapla
   const calculateCurrentLeaguePosition = () => {
@@ -623,6 +626,8 @@ function App() {
         setShowMatchPlay={setShowMatchPlay}
         club={club}
         matchData={currentMatch}
+        playerEnergies={playerEnergies}
+        setPlayerEnergies={setPlayerEnergies}
                   onMatchEnd={(result) => {
             console.log('Maç sonucu:', result);
             
@@ -632,8 +637,9 @@ function App() {
               
               result.events.forEach(event => {
                 if (event.player) {
-                  if (!newPlayerStats[event.player]) {
-                    newPlayerStats[event.player] = {
+                  const playerName = event.player.name || event.player;
+                  if (!newPlayerStats[playerName]) {
+                    newPlayerStats[playerName] = {
                       goals: 0,
                       assists: 0,
                       yellowCards: 0,
@@ -646,34 +652,36 @@ function App() {
                   if (currentMatch.type === 'friendly') {
                     if (event.type === 'injury') {
                       const matchesOut = Math.floor(Math.random() * 10) + 1; // 1-10 maç
-                      newPlayerStats[event.player].injuries.push({
+                      newPlayerStats[playerName].injuries.push({
                         type: event.injuryType || 'Sakatlık',
                         matchesOut: matchesOut,
                         week: gameTime.week
                       });
+                      console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
                     }
                   } else {
                     // Lig maçlarında tüm istatistikleri kaydet
                     switch (event.type) {
                       case 'goal':
-                        newPlayerStats[event.player].goals++;
+                        newPlayerStats[playerName].goals++;
                         break;
                       case 'assist':
-                        newPlayerStats[event.player].assists++;
+                        newPlayerStats[playerName].assists++;
                         break;
                       case 'yellow':
-                        newPlayerStats[event.player].yellowCards++;
+                        newPlayerStats[playerName].yellowCards++;
                         break;
                       case 'red':
-                        newPlayerStats[event.player].redCards++;
+                        newPlayerStats[playerName].redCards++;
                         break;
                       case 'injury': {
                         const matchesOut = Math.floor(Math.random() * 10) + 1; // 1-10 maç
-                        newPlayerStats[event.player].injuries.push({
+                        newPlayerStats[playerName].injuries.push({
                           type: event.injuryType || 'Sakatlık',
                           matchesOut: matchesOut,
                           week: gameTime.week
                         });
+                        console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
                         break;
                       }
                     }
@@ -882,6 +890,43 @@ function App() {
                         const updatedClub = advanceWeek(club);
                         setClub(updatedClub);
                         setGameTime(updatedClub.gameTime);
+                        
+                                                  // Oyuncu enerjilerini güncelle (maç olmayan günlerde %5 artış)
+                          setPlayerEnergies(prevEnergies => {
+                            const newEnergies = { ...prevEnergies };
+                            
+                            // Tüm takımların oyuncularının enerjilerini güncelle
+                            Object.keys(turkishLeagues).forEach(leagueName => {
+                              const teams = turkishLeagues[leagueName];
+                              teams.forEach(teamName => {
+                                const teamKey = `${leagueName}_${teamName}`;
+                                if (newEnergies[teamKey]) {
+                                  newEnergies[teamKey] = newEnergies[teamKey].map(player => ({
+                                    ...player,
+                                    energy: Math.min(100, (player.energy || 100) + 5)
+                                  }));
+                                }
+                              });
+                            });
+                            
+                            return newEnergies;
+                          });
+                          
+                          // Sakatlık sürelerini azalt
+                          setPlayerStats(prevStats => {
+                            const newStats = { ...prevStats };
+                            
+                            Object.keys(newStats).forEach(playerName => {
+                              if (newStats[playerName].injuries) {
+                                newStats[playerName].injuries = newStats[playerName].injuries.map(injury => ({
+                                  ...injury,
+                                  matchesOut: Math.max(0, injury.matchesOut - 1) // Her hafta 1 maç azalt
+                                }));
+                              }
+                            });
+                            
+                            return newStats;
+                          });
                       }
                     }}
                     style={{ 

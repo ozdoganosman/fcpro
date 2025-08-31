@@ -75,6 +75,45 @@ export const generateFormFitnessMorale = () => {
   return values;
 };
 
+// Enerji seviyesi hesaplama fonksiyonu (0-100 arası)
+export const calculateEnergyLevel = () => {
+  // Tüm oyuncular %100 ile başlar
+  return 100;
+};
+
+// Maç içi enerji düşüşü hesaplama fonksiyonu
+export const calculateEnergyLoss = (fitness) => {
+  // Fitness değerini al
+  const fitnessValue = fitness[1]?.value || 0;
+  const fitnessType = fitness[1]?.type || 'neutral';
+  
+  // Dakika başına enerji düşüşü hesaplama (sabit hız)
+  let energyLossPerMinute = 0.08; // Normal (0) fitness için varsayılan düşüş
+  
+  if (fitnessType === 'positive') {
+    // +1 fitness: 0.05 düşüş, +2 fitness: 0.03 düşüş, +3 fitness: 0.02 düşüş
+    if (fitnessValue === 1) {
+      energyLossPerMinute = 0.05;
+    } else if (fitnessValue === 2) {
+      energyLossPerMinute = 0.03;
+    } else if (fitnessValue === 3) {
+      energyLossPerMinute = 0.02;
+    }
+  } else if (fitnessType === 'negative') {
+    // -1 fitness: 0.1 düşüş, -2 fitness: 0.12 düşüş, -3 fitness: 0.15 düşüş
+    if (fitnessValue === 1) {
+      energyLossPerMinute = 0.1;
+    } else if (fitnessValue === 2) {
+      energyLossPerMinute = 0.12;
+    } else if (fitnessValue === 3) {
+      energyLossPerMinute = 0.15;
+    }
+  }
+  
+  // Sadece dakika başına düşüşü döndür (toplam değil)
+  return energyLossPerMinute;
+};
+
 // Oyuncu maaşı hesaplama fonksiyonu
 export const calculatePlayerSalary = (rating, age, position, leagueName) => {
   // Lig bazında maaş çarpanları
