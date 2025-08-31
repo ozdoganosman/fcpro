@@ -116,6 +116,173 @@ function App() {
   
   // Oyuncu enerjileri state'i (kalıcı)
   const [playerEnergies, setPlayerEnergies] = useState({});
+  
+  // Maç sonu işleme fonksiyonu
+  const handleMatchEnd = (result) => {
+    // Maç sonucunu işle
+    console.log('Maç sonucu:', result);
+    
+    // Oyuncu istatistiklerini güncelle
+    const newPlayerStats = { ...playerStats };
+    
+    result.events.forEach(event => {
+      const playerName = event.player?.name || event.player;
+      
+      if (!newPlayerStats[playerName]) {
+        newPlayerStats[playerName] = {
+          goals: 0,
+          assists: 0,
+          yellowCards: 0,
+          redCards: 0,
+          injuries: []
+        };
+      }
+      
+      switch (event.type) {
+        case 'goal':
+          newPlayerStats[playerName].goals++;
+          break;
+        case 'assist':
+          newPlayerStats[playerName].assists++;
+          break;
+        case 'yellowCard':
+          newPlayerStats[playerName].yellowCards++;
+          break;
+        case 'redCard':
+          newPlayerStats[playerName].redCards++;
+          break;
+        case 'injury':
+          // Sadece hazırlık maçlarında sakatlık kaydet
+          if (currentMatch.type === 'friendly') {
+            const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
+            newPlayerStats[playerName].injuries.push({
+              type: event.injuryType || 'Sakatlık',
+              matchesOut: matchesOut,
+              week: gameTime.week
+            });
+            console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
+          }
+          break;
+      }
+    });
+    
+    setPlayerStats(newPlayerStats);
+    
+    // Maç sonucunu fikstüre ekle
+    if (currentMatch.type === 'league' && currentMatch.fixture) {
+      // Lig fikstüründen doğru maçı bul ve güncelle
+      const currentWeek = gameTime.week - 3;
+      const leagueFixtures = fixtureData[club.league] || [];
+      const fixtureToUpdate = leagueFixtures.find(f => 
+        f.week === currentWeek && 
+        ((f.homeTeam === club.name && f.awayTeam === currentMatch.awayTeam) ||
+         (f.awayTeam === club.name && f.homeTeam === currentMatch.awayTeam))
+      );
+      
+      if (fixtureToUpdate) {
+        // Ev sahibi/deplasman durumuna göre doğru skoru kaydet
+        if (currentMatch.isHome) {
+          // Kullanıcı ev sahibi, skor doğru
+          fixtureToUpdate.result = `${result.homeScore}-${result.awayScore}`;
+        } else {
+          // Kullanıcı deplasman, skoru ters çevir
+          fixtureToUpdate.result = `${result.awayScore}-${result.homeScore}`;
+        }
+        fixtureToUpdate.played = true;
+        console.log('Lig maçı sonucu fikstüre kaydedildi:', fixtureToUpdate);
+      }
+      
+      // Maç sonucu fikstüre kaydedildi, lig tablosu otomatik güncellenecek
+      
+      // Diğer takımların maçlarını da çalıştır
+      generateOtherTeamResults();
+    } else if (currentMatch.type === 'friendly' && currentMatch.fixture) {
+      // Hazırlık maçı sonucunu fikstüre ekle
+      const currentWeek = gameTime.week;
+      
+      // Bu hafta için hazırlık maçını bul ve güncelle
+      let fixtureToUpdate = null;
+      
+      console.log('Hazırlık maçı güncelleniyor:', { currentWeek, awayTeam: currentMatch.awayTeam });
+      console.log('currentMatch.fixture:', currentMatch.fixture);
+      
+      // Önce currentMatch.fixture varsa onu kullan (en güvenilir yöntem)
+      if (currentMatch.fixture) {
+        fixtureToUpdate = preSeasonFixtures.find(fixture => 
+          fixture === currentMatch.fixture
+        );
+        console.log('Fixture referansı ile bulundu:', fixtureToUpdate);
+      }
+      
+      // Eğer bulunamazsa, hafta ve takım adına göre ara
+      if (!fixtureToUpdate) {
+        fixtureToUpdate = preSeasonFixtures.find(fixture => 
+          Math.abs(fixture.matchday) === currentWeek && fixture.awayTeam === currentMatch.awayTeam
+        );
+        console.log('Hafta ve takım adı ile bulundu:', fixtureToUpdate);
+      }
+      
+      // Hala bulunamazsa, sadece takım adına göre ara (son çare)
+      if (!fixtureToUpdate) {
+        fixtureToUpdate = preSeasonFixtures.find(fixture => 
+          fixture.awayTeam === currentMatch.awayTeam && !fixture.played
+        );
+        console.log('Sadece takım adı ile bulundu:', fixtureToUpdate);
+      }
+      
+      if (fixtureToUpdate) {
+        fixtureToUpdate.result = `${result.homeScore}-${result.awayScore}`;
+        fixtureToUpdate.played = true;
+        // State'i güncellemeye gerek yok, doğrudan obje güncellendi
+        console.log('Hazırlık maçı sonucu fikstüre kaydedildi:', fixtureToUpdate);
+      } else {
+        console.log('Hazırlık maçı bulunamadı:', { currentWeek, awayTeam: currentMatch.awayTeam });
+        console.log('Mevcut hazırlık maçları:', preSeasonFixtures);
+      }
+    } else if (currentMatch.type === 'friendly') {
+      // Rastgele hazırlık maçı sonucunu sadece kulüp geçmişine ekle
+      console.log('Rastgele hazırlık maçı sonucu kaydedildi');
+    }
+    
+    // Maç sonucunu kulüp geçmişine ekle
+    const matchResult = {
+      homeTeam: club.name,
+      awayTeam: currentMatch.awayTeam,
+      homeScore: result.homeScore,
+      awayScore: result.awayScore,
+      type: currentMatch.type,
+      week: gameTime.week
+    };
+    
+    club.matchResults.push(matchResult);
+    
+    // Maç tipini sakla
+    const matchType = currentMatch.type;
+    setCurrentMatch(null);
+    
+    // Sadece lig maçlarından sonra diğer maç sonuçlarını göster
+    if (matchType === 'league') {
+      // Önce diğer maçları oyna, sonra modalı aç
+      setTimeout(() => {
+        // Hangi haftanın maç sonuçlarını göstereceğini belirt
+        const matchWeek = gameTime.week - 3; // Lig haftası
+        setShowOtherMatches(true);
+        // Modal'a hangi haftayı göstereceğini geçmek için state ekleyelim
+        setCurrentMatchWeek(matchWeek);
+      }, 100);
+    }
+    
+    // Eğer hafta sonu ise gelir-gider raporu göster
+    if (gameTime.day === 'Hafta Sonu') {
+      // Hafta geçişi yap
+      const updatedClub = advanceWeek(club);
+      setClub(updatedClub);
+      setGameTime({ week: updatedClub.gameTime.week, day: 'Hafta Başı' });
+      
+      // Gelir-gider raporu göster
+      setShowWeeklyReport(true);
+    }
+  };
 
   // Ana menüde gösterilecek lig sıralamasını hesapla
   const calculateCurrentLeaguePosition = () => {
@@ -635,173 +802,8 @@ function App() {
             matchData={currentMatch}
             playerEnergies={playerEnergies}
             setPlayerEnergies={setPlayerEnergies}
-            onMatchEnd={(result) => {
-              // Maç sonucunu işle
-              console.log('Maç sonucu:', result);
-              
-              // Oyuncu istatistiklerini güncelle
-              const newPlayerStats = { ...playerStats };
-              
-              result.events.forEach(event => {
-                const playerName = event.player?.name || event.player;
-                
-                if (!newPlayerStats[playerName]) {
-                  newPlayerStats[playerName] = {
-                    goals: 0,
-                    assists: 0,
-                    yellowCards: 0,
-                    redCards: 0,
-                    injuries: []
-                  };
-                }
-                
-                switch (event.type) {
-                  case 'goal':
-                    newPlayerStats[playerName].goals++;
-                    break;
-                  case 'assist':
-                    newPlayerStats[playerName].assists++;
-                    break;
-                  case 'yellowCard':
-                    newPlayerStats[playerName].yellowCards++;
-                    break;
-                  case 'redCard':
-                    newPlayerStats[playerName].redCards++;
-                    break;
-                  case 'injury':
-                    // Sadece hazırlık maçlarında sakatlık kaydet
-                    if (currentMatch.type === 'friendly') {
-                      const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
-                      newPlayerStats[playerName].injuries.push({
-                        type: event.injuryType || 'Sakatlık',
-                        matchesOut: matchesOut,
-                        week: gameTime.week
-                      });
-                      console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
-                    }
-                    break;
-                }
-              });
-              
-              setPlayerStats(newPlayerStats);
-            }
-            
-            // Maç sonucunu fikstüre ekle
-            if (currentMatch.type === 'league' && currentMatch.fixture) {
-              // Lig fikstüründen doğru maçı bul ve güncelle
-              const currentWeek = gameTime.week - 3;
-              const leagueFixtures = fixtureData[club.league] || [];
-              const fixtureToUpdate = leagueFixtures.find(f => 
-                f.week === currentWeek && 
-                ((f.homeTeam === club.name && f.awayTeam === currentMatch.awayTeam) ||
-                 (f.awayTeam === club.name && f.homeTeam === currentMatch.awayTeam))
-              );
-              
-              if (fixtureToUpdate) {
-                // Ev sahibi/deplasman durumuna göre doğru skoru kaydet
-                if (currentMatch.isHome) {
-                  // Kullanıcı ev sahibi, skor doğru
-                  fixtureToUpdate.result = `${result.homeScore}-${result.awayScore}`;
-                } else {
-                  // Kullanıcı deplasman, skoru ters çevir
-                  fixtureToUpdate.result = `${result.awayScore}-${result.homeScore}`;
-                }
-                fixtureToUpdate.played = true;
-                console.log('Lig maçı sonucu fikstüre kaydedildi:', fixtureToUpdate);
-              }
-              
-              // Maç sonucu fikstüre kaydedildi, lig tablosu otomatik güncellenecek
-              
-              // Diğer takımların maçlarını da çalıştır
-              generateOtherTeamResults();
-            } else if (currentMatch.type === 'friendly' && currentMatch.fixture) {
-              // Hazırlık maçı sonucunu fikstüre ekle
-              const currentWeek = gameTime.week;
-              
-              // Bu hafta için hazırlık maçını bul ve güncelle
-              let fixtureToUpdate = null;
-              
-              console.log('Hazırlık maçı güncelleniyor:', { currentWeek, awayTeam: currentMatch.awayTeam });
-              console.log('currentMatch.fixture:', currentMatch.fixture);
-              
-              // Önce currentMatch.fixture varsa onu kullan (en güvenilir yöntem)
-              if (currentMatch.fixture) {
-                fixtureToUpdate = preSeasonFixtures.find(fixture => 
-                  fixture === currentMatch.fixture
-                );
-                console.log('Fixture referansı ile bulundu:', fixtureToUpdate);
-              }
-              
-              // Eğer bulunamazsa, hafta ve takım adına göre ara
-              if (!fixtureToUpdate) {
-                fixtureToUpdate = preSeasonFixtures.find(fixture => 
-                  Math.abs(fixture.matchday) === currentWeek && fixture.awayTeam === currentMatch.awayTeam
-                );
-                console.log('Hafta ve takım adı ile bulundu:', fixtureToUpdate);
-              }
-              
-              // Hala bulunamazsa, sadece takım adına göre ara (son çare)
-              if (!fixtureToUpdate) {
-                fixtureToUpdate = preSeasonFixtures.find(fixture => 
-                  fixture.awayTeam === currentMatch.awayTeam && !fixture.played
-                );
-                console.log('Sadece takım adı ile bulundu:', fixtureToUpdate);
-              }
-              
-              if (fixtureToUpdate) {
-                fixtureToUpdate.result = `${result.homeScore}-${result.awayScore}`;
-                fixtureToUpdate.played = true;
-                // State'i güncellemeye gerek yok, doğrudan obje güncellendi
-                console.log('Hazırlık maçı sonucu fikstüre kaydedildi:', fixtureToUpdate);
-              } else {
-                console.log('Hazırlık maçı bulunamadı:', { currentWeek, awayTeam: currentMatch.awayTeam });
-                console.log('Mevcut hazırlık maçları:', preSeasonFixtures);
-              }
-            } else if (currentMatch.type === 'friendly') {
-              // Rastgele hazırlık maçı sonucunu sadece kulüp geçmişine ekle
-              console.log('Rastgele hazırlık maçı sonucu kaydedildi');
-            }
-            
-            // Maç sonucunu kulüp geçmişine ekle
-            const matchResult = {
-              homeTeam: club.name,
-              awayTeam: currentMatch.awayTeam,
-              homeScore: result.homeScore,
-              awayScore: result.awayScore,
-              type: currentMatch.type,
-              week: gameTime.week
-            };
-            
-            club.matchResults.push(matchResult);
-            
-            // Maç tipini sakla
-            const matchType = currentMatch.type;
-            setCurrentMatch(null);
-            
-            // Sadece lig maçlarından sonra diğer maç sonuçlarını göster
-            if (matchType === 'league') {
-              // Önce diğer maçları oyna, sonra modalı aç
-              setTimeout(() => {
-                // Hangi haftanın maç sonuçlarını göstereceğini belirt
-                const matchWeek = gameTime.week - 3; // Lig haftası
-                setShowOtherMatches(true);
-                // Modal'a hangi haftayı göstereceğini geçmek için state ekleyelim
-                setCurrentMatchWeek(matchWeek);
-              }, 100);
-            }
-            
-            // Eğer hafta sonu ise gelir-gider raporu göster
-            if (gameTime.day === 'Hafta Sonu') {
-              // Hafta geçişi yap
-              const updatedClub = advanceWeek(club);
-              setClub(updatedClub);
-              setGameTime({ week: updatedClub.gameTime.week, day: 'Hafta Başı' });
-              
-              // Gelir-gider raporu göster
-              setShowWeeklyReport(true);
-            }
-          }}
-      />}
+            onMatchEnd={handleMatchEnd}
+          />}
       {showOtherMatches && <OtherMatchesModal 
         setShowOtherMatches={setShowOtherMatches}
         club={club}
