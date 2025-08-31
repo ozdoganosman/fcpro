@@ -1,0 +1,182 @@
+/* Football Chairman inspired UI */
+
+:root {
+  --blue: #2c466b;
+  --green: #3e5c2c;
+  --green-light: #e6f4e6;
+  --gold: #b88c2c;
+  --win: #2c7b2c;
+  --draw: #b88c2c;
+  --loss: #c00;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+
+.fc-container {
+  min-height: 100%;
+  color: #fff;
+  background: linear-gradient(to bottom, var(--blue) 60%, var(--green) 100%);
+}
+
+/* Header */
+.fc-header { text-align: center; padding: 20px 0 10px; }
+.fc-title { font-size: 20px; font-weight: 800; letter-spacing: .5px; opacity: .95; }
+.fc-ribbon {
+  display: inline-block; margin: 10px auto 6px; background: #fff; color: var(--blue);
+  padding: 8px 32px; border-radius: 8px; font-weight: 800; font-size: 32px; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.fc-sub { font-size: 14px; opacity: .95; }
+
+/* Cards grid */
+.fc-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.fc-card {
+  min-width: 96px; padding: 10px 16px; border-radius: 10px; text-align: center; font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.fc-card.white { background: #fff; color: var(--blue); }
+.fc-card.navy { background: var(--blue); color: #fff; }
+.fc-card.green { background: var(--green); color: #fff; }
+.fc-card.light { background: var(--green-light); color: var(--blue); }
+.fc-card .big { display: block; font-size: 24px; margin-top: 2px; }
+
+/* Dots for recent results */
+.fc-dots { display: flex; justify-content: center; gap: 10px; margin: 16px 0; }
+.fc-dot { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-weight: 800; display:flex; align-items:center; justify-content:center; }
+
+/* Bottom next match pill */
+.fc-next { margin: 24px auto 0; background: var(--green); color: #fff; border-radius: 8px; padding: 10px 14px; text-align: center; max-width: 360px; font-weight: 800; }
+
+/* Modals */
+.fc-modal-backdrop { position: fixed; inset: 0; background: rgba(44,70,107,.95); z-index: 1000; display:flex; align-items:center; justify-content:center; }
+.fc-modal { background: #fff; color: var(--blue); border-radius: 14px; padding: 16px; min-width: 360px; max-width: 95vw; max-height: 85vh; overflow: auto; box-shadow: 0 2px 16px rgba(0,0,0,.2); }
+.fc-modal h3 { margin: 0 0 8px; text-align: center; font-size: 18px; }
+.fc-btn { background: var(--green); color:#fff; border:none; border-radius:6px; padding:8px 16px; font-weight: 800; cursor:pointer; }
+.fc-btn-row { display:flex; gap:10px; justify-content:center; margin-top: 12px; }
+
+table.fc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.fc-table th, table.fc-table td { padding: 6px; }
+table.fc-table thead tr { background: var(--green-light); }
+table.fc-table tbody tr:nth-child(even) { background: #f5f5f5; }
+table.fc-table tbody tr:nth-child(odd) { background: var(--green-light); }
+
+/* Finance specific */
+.fc-panel { background: rgba(255,255,255,.92); border-radius: 12px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.fc-row { display:flex; align-items:center; gap:14px; }
+.fc-bank-icon { width: 90px; height: 90px; background: var(--green-light); border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size: 42px; }
+.fc-bank-title { font-weight: 900; font-size: 18px; margin-bottom: 6px; }
+.fc-badge-green { display:inline-block; background: var(--win); color:#fff; padding: 6px 12px; border-radius: 6px; font-weight: 800; }
+.fc-muted { color: #5a6a80; }
+.fc-fin-list { margin-top: 10px; }
+.fc-fin-list .item { display:flex; justify-content:space-between; padding: 6px 2px; }
+.fc-cta { margin-top: 10px; padding: 12px; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); text-align:center; font-weight: 800; }
+.fc-footerbar { display:flex; gap:10px; justify-content:space-between; margin-top: 14px; }
+.fc-footerbar .fc-btn { flex:1; }
+
+/* Squad */
+.fc-squad h3 { margin: 0 0 10px; text-align:center; font-size:18px; }
+.fc-squad .legend { display:flex; justify-content:space-between; margin-bottom:4px; font-weight:700; }
+table.fc-squad-table { width:100%; border-collapse:collapse; font-size:14px; }
+table.fc-squad-table th, table.fc-squad-table td { padding:6px; }
+table.fc-squad-table thead tr { background: var(--green-light); }
+table.fc-squad-table tbody tr:nth-child(even) { background:#f5f5f5; }
+table.fc-squad-table tbody tr:nth-child(odd) { background: var(--green-light); }
+.fc-badge-pos { display:inline-block; min-width:20px; text-align:center; padding:2px 6px; border-radius:4px; color:#fff; font-weight:800; }
+.pos-GK { background:#2c7b2c; }
+.pos-DF { background:#2c466b; }
+.pos-MF { background:#b88c2c; }
+.pos-FW { background:#c33; }
+
+/* Form badge */
+.form-badge { display:inline-block; min-width:28px; padding:2px 8px; border-radius:999px; color:#fff; font-weight:800; text-align:center; }
+.form-pos { background:#2c7b2c; }
+.form-neg { background:#c00; }
+.form-zero { background:#7a8596; }
+
+/* Manager hire */
+.mgr-card { background: rgba(255,255,255,.96); border-radius: 12px; padding: 12px; display:flex; gap:12px; margin-bottom:10px; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+.mgr-right { flex:1; }
+.mgr-name { font-weight:900; font-size:18px; margin-bottom:6px; }
+.mgr-badges { display:flex; gap:6px; margin-bottom:6px; }
+
+/* Team Selection */
+.fc-card.selected { 
+  background: var(--win) !important; 
+  color: #fff !important; 
+  border: 2px solid var(--win) !important; 
+}
+
+.fc-btn.active { 
+  background: var(--win) !important; 
+  color: #fff !important; 
+}
+
+.fc-btn:disabled { 
+  opacity: 0.6; 
+  cursor: not-allowed; 
+}
+.mgr-badge { display:inline-block; border-radius:4px; padding:4px 8px; font-weight:900; }
+.mgr-badge.g { background:#bfe3bf; color:#1f3f1f; }
+.mgr-badge.k { background:#000; color:#fff; }
+.mgr-meta { color:#333; font-size:14px; }
+.mgr-actions { display:flex; justify-content:flex-end; }
+.mgr-actions .fc-btn { padding:6px 12px; }
+
+/* Training Menu */
+.training-menu {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  color: #222;
+}
+.training-menu h3 { text-align: center; }
+.training-menu .rating-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.training-menu .rating-section img {
+  width: 80px;
+  height: 80px;
+}
+.training-menu .rating-section .rating-value {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.training-menu .controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.training-menu .controls button {
+  background: red;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+}
+.training-menu .controls .rating-display {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.training-menu .controls button.increase {
+  background: green;
+}
+.training-menu .costs {
+  margin-bottom: 16px;
+}
+.training-menu .actions {
+  display: flex;
+  justify-content: space-between;
+}
+.training-menu .actions button {
+  background: green;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+}
