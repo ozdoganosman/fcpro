@@ -22,6 +22,8 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
   const [matchEnded, setMatchEnded] = useState(false);
   const [preCalculatedMatch, setPreCalculatedMatch] = useState(null);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [showGoalOverlay, setShowGoalOverlay] = useState(null);
   // Re-render trigger for mutable matchState
   const [, setRenderTick] = useState(0);
 
@@ -30,10 +32,18 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
 
   // Mutable engine state (React state yerine — performans için)
   const matchStateRef = useRef(null);
+  const overlayTimerRef = useRef(null);
 
   // Manager referansları
   const homeManagerRef = useRef(null);
   const awayManagerRef = useRef(null);
+
+  // Cleanup overlay timer on unmount
+  useEffect(() => {
+    return () => {
+      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+    };
+  }, []);
 
   // Global allSquads'dan takım kadrosunu bul
   const findSquad = useCallback((teamName) => {
@@ -66,14 +76,12 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
     const teamKey = `${club.league}_${teamName}`;
 
     if (playerEnergies[teamKey]) {
-      // Mevcut enerjileri uygula
       const savedEnergies = playerEnergies[teamKey];
       [...squad.firstTeam, ...squad.substitutes].forEach(player => {
         const saved = savedEnergies.find(s => s.name === player.name);
         if (saved) player.energy = saved.energy;
       });
     } else {
-      // İlk kez: %100 enerji
       [...squad.firstTeam, ...squad.substitutes].forEach(p => { p.energy = 100; });
       setPlayerEnergies(prev => ({
         ...prev,
@@ -81,7 +89,6 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
       }));
     }
 
-    // Dinamik İLK 11 seç
     const { firstTeam, substitutes } = selectBestFirstTeam(squad, manager);
     squad.firstTeam = firstTeam;
     squad.substitutes = substitutes;
@@ -103,11 +110,9 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
 
     if (!homeSquad || !awaySquad) return;
 
-    // Maç simülasyonu
     const result = simulateMatch(homeSquad, awaySquad, homeMgr, awayMgr, homeTeam, awayTeam);
     setPreCalculatedMatch(result);
 
-    // MatchState oluştur
     matchStateRef.current = createMatchState(homeSquad, awaySquad);
   }, []); // eslint-disable-line
 
@@ -124,12 +129,19 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
 
       setMatchEvents(prev => [...prev, event, ...additionalEvents]);
       setCurrentEventIndex(prev => prev + 1);
-      setRenderTick(prev => prev + 1); // matchState değişikliklerini yansıt
+      setRenderTick(prev => prev + 1);
+
+      // Gol kutlama overlay
+      if (event.type === 'goal') {
+        setShowGoalOverlay({ team: event.team, player: event.player, minute: event.minute });
+        if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
+        overlayTimerRef.current = setTimeout(() => setShowGoalOverlay(null), Math.max(800, 2500 / playbackSpeed));
+      }
     } else {
       setIsPlaying(false);
       setMatchEnded(true);
     }
-  }, [preCalculatedMatch, currentEventIndex, homeTeam, awayTeam]);
+  }, [preCalculatedMatch, currentEventIndex, homeTeam, awayTeam, playbackSpeed]);
 
   // fastForwardToEnd — tüm kalan olayları tek seferde işle
   const fastForwardToEnd = useCallback(() => {
@@ -154,15 +166,16 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
     setMatchEnded(true);
   }, [preCalculatedMatch, currentEventIndex, homeTeam, awayTeam]);
 
-  // Oynatma interval'i
+  // Oynatma interval'i — hıza göre ayarlanır
   useEffect(() => {
     if (isPlaying && !isFastForward && preCalculatedMatch) {
+      const intervalMs = Math.max(100, 800 / playbackSpeed);
       const interval = setInterval(() => {
         advanceTime();
-      }, 800);
+      }, intervalMs);
       return () => clearInterval(interval);
     }
-  }, [isPlaying, isFastForward, preCalculatedMatch, advanceTime]);
+  }, [isPlaying, isFastForward, preCalculatedMatch, advanceTime, playbackSpeed]);
 
   // "Devam Et" butonu — enerjileri kaydet ve maçı bitir
   const handleContinue = useCallback(() => {
@@ -172,7 +185,6 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
     const homeTeamKey = `${club.league}_${homeTeam}`;
     const awayTeamKey = `${club.league}_${awayTeam}`;
 
-    // Enerjileri kaydet (firstTeam + substitutes)
     if (ms.homeSquad) {
       setPlayerEnergies(prev => ({
         ...prev,
@@ -186,7 +198,6 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
       }));
     }
 
-    // Global state'e geri yaz (enerji sürekliliği)
     const homeSquadGlobal = findSquad(homeTeam);
     const awaySquadGlobal = findSquad(awayTeam);
     if (homeSquadGlobal && ms.homeSquad) {
@@ -210,7 +221,7 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
 
   return (
     <div className="fc-modal-backdrop">
-      <div className="fc-modal" style={{ maxWidth: '600px', maxHeight: '90vh', overflow: 'hidden' }}>
+      <div className="fc-modal" style={{ maxWidth: '620px', maxHeight: '90vh', overflow: 'hidden', position: 'relative' }}>
         <MatchScoreboard
           homeTeam={homeTeam}
           awayTeam={awayTeam}
@@ -219,23 +230,27 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
           currentMinute={currentMinute}
           matchType={matchData.type}
           league={club.league}
+          allEvents={matchEvents}
+          showGoalOverlay={!!showGoalOverlay}
         />
 
-        <div className="fc-panel" style={{ padding: '20px' }}>
+        <div className="fc-panel" style={{ padding: '15px 20px' }}>
           <MatchControls
             isPlaying={isPlaying}
             matchEnded={matchEnded}
+            playbackSpeed={playbackSpeed}
             onTogglePlay={() => setIsPlaying(!isPlaying)}
             onFastForward={fastForwardToEnd}
             onContinue={handleContinue}
+            onSpeedChange={setPlaybackSpeed}
           />
 
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '10px' }}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1.5fr 1fr',
-              gap: '15px',
-              height: '450px'
+              gap: '10px',
+              height: '430px'
             }}>
               {ms && (
                 <>
@@ -245,7 +260,10 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
                     isHome={true}
                     manager={homeManagerRef.current}
                   />
-                  <MatchEventLog events={matchEvents} />
+                  <MatchEventLog
+                    events={matchEvents}
+                    currentZone={ms.currentZone}
+                  />
                   <TeamSquadPanel
                     teamName={awayTeam}
                     matchState={ms}
@@ -264,6 +282,30 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
             )}
           </div>
         </div>
+
+        {/* Gol kutlama overlay */}
+        {showGoalOverlay && (
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            zIndex: 100, borderRadius: '14px',
+            pointerEvents: 'none'
+          }}>
+            <div style={{ textAlign: 'center', color: 'white' }}>
+              <div style={{ fontSize: '48px', marginBottom: '8px' }}>⚽</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#FFD700', marginBottom: '4px' }}>
+                GOOOL!
+              </div>
+              <div style={{ fontSize: '18px' }}>
+                {showGoalOverlay.player}
+              </div>
+              <div style={{ fontSize: '14px', color: '#ccc', marginTop: '4px' }}>
+                {showGoalOverlay.minute}&apos;
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

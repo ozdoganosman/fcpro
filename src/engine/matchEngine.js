@@ -201,6 +201,66 @@ export const POSITION_SCENARIOS = [
   }
 ];
 
+// ========== TAKTİK SENARYO AĞIRLIKLARI ==========
+
+export const TACTIC_SCENARIO_WEIGHTS = {
+  'Dikine Oyun': {
+    'Kontra Atak': 1.8, 'Hızlı Atak': 2.0, 'Uzun Pas': 1.5, 'Dribling': 1.3,
+    'Pas Oyunu': 0.5, 'Kısa Pas Oyunu': 0.4, 'Orta Saha Kontrolü': 0.7
+  },
+  'Pas Oyunu': {
+    'Pas Oyunu': 2.0, 'Kısa Pas Oyunu': 2.5, 'Orta Saha Kontrolü': 1.5, 'Kanat Oyunu': 1.3,
+    'Kontra Atak': 0.5, 'Uzun Pas': 0.4, 'Hızlı Atak': 0.6
+  }
+};
+
+// ========== DOLGU OLAYLARI (atmosfer) ==========
+
+export const FILLER_EVENTS = [
+  { type: 'save', templates: [
+    '{goalkeeper} topu güvenle yakaladı',
+    '{goalkeeper} yumrukla uzaklaştırdı',
+    '{goalkeeper} refleksle kurtardı'
+  ]},
+  { type: 'offside', templates: [
+    '{attackingPlayer} ofsayt pozisyonunda yakalandı',
+    'Yan hakem bayrağı kaldırdı, ofsayt'
+  ]},
+  { type: 'foul', templates: [
+    '{defendingPlayer} faul yaptı, serbest vuruş',
+    '{attackingPlayer} rakibine faul yaptı'
+  ]},
+  { type: 'throw_in', templates: [
+    'Top taç çizgisinden çıktı, taç atışı {attackingTeam} için',
+    '{defendingPlayer} topu taça çıkardı'
+  ]}
+];
+
+// ========== SENARYO SAHA BÖLGELERİ ==========
+
+export const SCENARIO_ZONES = {
+  'Orta Saha Kontrolü': ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'],
+  'Kontra Atak': ['defense-center', 'midfield-center', 'attack-center', 'attack-center'],
+  'Kanat Oyunu': ['midfield-right', 'attack-right', 'attack-right', 'attack-center'],
+  'Pas Oyunu': ['midfield-left', 'midfield-center', 'midfield-right', 'attack-center'],
+  'Korner Pozisyonu': ['attack-right', 'attack-right', 'attack-center', 'attack-center'],
+  'Serbest Vuruş': ['midfield-center', 'attack-center', 'attack-center', 'attack-center'],
+  'Dribling': ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'],
+  'Uzun Pas': ['defense-center', 'midfield-center', 'attack-center', 'attack-center'],
+  'Hızlı Atak': ['midfield-center', 'attack-center', 'attack-center', 'attack-center'],
+  'Uzun Şut': ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'],
+  'Kafa Vuruşu': ['attack-left', 'attack-center', 'attack-center', 'attack-center'],
+  'Savunma Müdahalesi': ['attack-center', 'defense-center', 'midfield-center', 'midfield-center'],
+  'Savunma Bloku': ['attack-center', 'defense-center', 'defense-center', 'defense-center'],
+  'Kısa Pas Oyunu': ['midfield-left', 'midfield-center', 'midfield-right', 'midfield-center'],
+  'Kaleci Kurtarışı': ['attack-center', 'attack-center', 'defense-center', 'defense-center'],
+  'Savunma Hatası': ['defense-center', 'defense-center', 'attack-center', 'attack-center'],
+  'Ofsayt Pozisyonu': ['midfield-center', 'attack-center', 'attack-center', 'attack-center'],
+  'Kale Direği': ['midfield-center', 'attack-center', 'attack-center', 'attack-center'],
+  'Penaltı Pozisyonu': ['attack-center', 'attack-center', 'attack-center', 'attack-center'],
+  'Kaleci Hatası': ['defense-center', 'defense-center', 'attack-center', 'attack-center']
+};
+
 // ========== YARDIMCI FONKSİYONLAR ==========
 
 /** Form/fitness/morale değerini işaretli olarak döndür */
@@ -236,6 +296,73 @@ export const selectWeightedScenario = () => {
     if (random <= 0) return scenario;
   }
   return POSITION_SCENARIOS[0];
+};
+
+/** Taktik ağırlıklı senaryo seçimi */
+export const selectWeightedScenarioWithTactic = (tacticStyle) => {
+  const multipliers = TACTIC_SCENARIO_WEIGHTS[tacticStyle] || {};
+  const adjustedScenarios = POSITION_SCENARIOS.map(s => ({
+    ...s,
+    weight: s.weight * (multipliers[s.name] || 1.0)
+  }));
+  const totalWeight = adjustedScenarios.reduce((sum, s) => sum + s.weight, 0);
+  let random = Math.random() * totalWeight;
+  for (const scenario of adjustedScenarios) {
+    random -= scenario.weight;
+    if (random <= 0) return scenario;
+  }
+  return adjustedScenarios[0];
+};
+
+/** Dakika bazlı olay olasılığı — gerçekçi kümelenme */
+export const getMinuteEventProbability = (minute) => {
+  if (minute >= 1 && minute <= 5) return 0.20;
+  if (minute >= 20 && minute <= 35) return 0.10;
+  if (minute >= 40 && minute <= 45) return 0.22;
+  if (minute >= 46 && minute <= 50) return 0.18;
+  if (minute >= 55 && minute <= 65) return 0.12;
+  if (minute >= 85 && minute <= 90) return 0.25;
+  return 0.15;
+};
+
+/** Momentum hesaplama (-1.0 ile +1.0 arası) */
+export const calculateMomentum = (scoreDiff, minutesSinceLastGoal, isHome) => {
+  let momentum = 0;
+  if (minutesSinceLastGoal !== null && minutesSinceLastGoal < 10) {
+    momentum += (10 - minutesSinceLastGoal) * 0.08;
+  }
+  if (scoreDiff < 0) momentum += Math.min(0.3, Math.abs(scoreDiff) * 0.15);
+  if (scoreDiff > 0) momentum -= Math.min(0.2, scoreDiff * 0.1);
+  if (isHome) momentum += 0.05;
+  return Math.max(-1.0, Math.min(1.0, momentum));
+};
+
+/** Gerçekçi gol olasılığı eğrisi */
+export const calculateGoalProbability = (attackingStrength, defendingStrength, momentum, minute) => {
+  const ratio = attackingStrength / (attackingStrength + defendingStrength);
+  let baseProb = 0.05 + ratio * 0.30;
+  baseProb += momentum * 0.05;
+  if (minute >= 80) baseProb += 0.03;
+  if (minute > 60) baseProb += 0.02;
+  return Math.max(0.03, Math.min(0.35, baseProb));
+};
+
+/** Dolgu olayı üret (save, offside, foul, throw_in) */
+export const generateFillerEvent = (minute, team, squad, teamName, opponentSquad) => {
+  const eventDef = FILLER_EVENTS[Math.floor(Math.random() * FILLER_EVENTS.length)];
+  const templates = eventDef.templates;
+  let description = templates[Math.floor(Math.random() * templates.length)];
+
+  const attackingPlayer = squad.firstTeam[Math.floor(Math.random() * squad.firstTeam.length)];
+  const defendingPlayer = opponentSquad.firstTeam[Math.floor(Math.random() * opponentSquad.firstTeam.length)];
+  const goalkeeper = opponentSquad.firstTeam.find(p => p.position === 'K') || opponentSquad.firstTeam[0];
+
+  description = description.replace('{attackingPlayer}', attackingPlayer?.name || 'Oyuncu');
+  description = description.replace('{defendingPlayer}', defendingPlayer?.name || 'Oyuncu');
+  description = description.replace('{goalkeeper}', goalkeeper?.name || 'Kaleci');
+  description = description.replace('{attackingTeam}', teamName);
+
+  return { minute, type: eventDef.type, team, description };
 };
 
 /** Dakika başına enerji kaybı hesapla */
@@ -426,12 +553,17 @@ export const createMatchState = (homeSquad, awaySquad) => ({
   homeSubstitutedPlayers: [],
   awaySubstitutedPlayers: [],
   events: [],
+  currentZone: 'midfield-center',
+  lastGoalMinute: null,
+  lastGoalTeam: null,
   stats: {
     homeShots: 0, awayShots: 0,
     homeShotsOnTarget: 0, awayShotsOnTarget: 0,
     homeCorners: 0, awayCorners: 0,
     homeFouls: 0, awayFouls: 0,
-    homePossession: 0, awayPossession: 0
+    homePossession: 0, awayPossession: 0,
+    homeSaves: 0, awaySaves: 0,
+    homeOffsides: 0, awayOffsides: 0
   }
 });
 
@@ -452,6 +584,8 @@ export const processEvent = (event, matchState, homeTeamName, awayTeamName) => {
     else matchState.stats.awayShotsOnTarget++;
     if (isHome) matchState.stats.homeShots++;
     else matchState.stats.awayShots++;
+    matchState.lastGoalMinute = event.minute;
+    matchState.lastGoalTeam = event.team;
   }
 
   // Pozisyon (topla oynama takibi)
@@ -472,6 +606,29 @@ export const processEvent = (event, matchState, homeTeamName, awayTeamName) => {
     const attackTeam = isHome ? 'away' : 'home';
     if (attackTeam === 'home') matchState.stats.homeShots++;
     else matchState.stats.awayShots++;
+  }
+
+  // Kurtarış
+  if (event.type === 'save') {
+    if (isHome) { matchState.stats.awayShotsOnTarget++; matchState.stats.homeSaves++; }
+    else { matchState.stats.homeShotsOnTarget++; matchState.stats.awaySaves++; }
+  }
+
+  // Ofsayt
+  if (event.type === 'offside') {
+    if (isHome) matchState.stats.homeOffsides++;
+    else matchState.stats.awayOffsides++;
+  }
+
+  // Faul (kartsız)
+  if (event.type === 'foul') {
+    if (isHome) matchState.stats.homeFouls++;
+    else matchState.stats.awayFouls++;
+  }
+
+  // Top bölgesi güncelle
+  if (event.zone) {
+    matchState.currentZone = event.zone;
   }
 
   // Sarı kart
@@ -596,46 +753,68 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
   const events = [];
   let simHomeScore = 0;
   let simAwayScore = 0;
+  let lastGoalMinute = null;
+  let lastGoalTeam = null;
+
+  // Taktik stili çıkar
+  const getStyle = (mgr) => mgr?.tactic?.includes('Dikine') ? 'Dikine Oyun' : 'Pas Oyunu';
 
   for (let minute = 1; minute <= 90; minute++) {
     // Yarı zaman
     if (minute === 45) {
-      events.push({ minute: 45, type: 'half', description: '⏸️ İlk Yarı Sonu' });
+      events.push({ minute: 45, type: 'half', description: '⏸️ İlk Yarı Sonu', zone: 'midfield-center' });
       continue;
     }
 
-    // Pozisyon başlatma olasılığı (%15)
-    if (Math.random() < 0.15) {
+    // Dakika bazlı olay olasılığı
+    const eventProb = getMinuteEventProbability(minute);
+
+    if (Math.random() < eventProb) {
       const homeStrength = calculateTeamStrength(homeSquad, homeManager, [], [], true);
       const awayStrength = calculateTeamStrength(awaySquad, awayManager, [], [], false);
 
       const totalStrength = homeStrength + awayStrength;
       const homeChance = homeStrength / totalStrength;
-      const attackingTeam = Math.random() < homeChance ? 'home' : 'away';
+
+      // Momentum etkisi
+      const homeMomentum = calculateMomentum(
+        simHomeScore - simAwayScore,
+        lastGoalTeam === 'home' && lastGoalMinute ? minute - lastGoalMinute : null,
+        true
+      );
+      const adjustedHomeChance = Math.max(0.2, Math.min(0.8, homeChance + homeMomentum * 0.1));
+      const attackingTeam = Math.random() < adjustedHomeChance ? 'home' : 'away';
       const defendingTeam = attackingTeam === 'home' ? 'away' : 'home';
 
-      // Ağırlıklı senaryo seç
-      const scenario = selectWeightedScenario();
+      // Taktik ağırlıklı senaryo seç
+      const attackingManager = attackingTeam === 'home' ? homeManager : awayManager;
+      const scenario = selectWeightedScenarioWithTactic(getStyle(attackingManager));
 
       const attackingSquad = attackingTeam === 'home' ? homeSquad : awaySquad;
       const defendingSquad = defendingTeam === 'home' ? homeSquad : awaySquad;
 
       if (attackingSquad && defendingSquad) {
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const byPos = (squad, pos) => squad.firstTeam.filter(p => p.position === pos);
+
         const players = {
-          attackingPlayer: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          defendingPlayer: defendingSquad.firstTeam[Math.floor(Math.random() * defendingSquad.firstTeam.length)],
-          midfielder: attackingSquad.firstTeam.filter(p => p.position === 'O')[Math.floor(Math.random() * attackingSquad.firstTeam.filter(p => p.position === 'O').length)] || attackingSquad.firstTeam[0],
-          goalkeeper: defendingSquad.firstTeam.filter(p => p.position === 'K')[0] || defendingSquad.firstTeam[0],
-          cornerTaker: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          freeKickTaker: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          passer: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          headerPlayer: attackingSquad.firstTeam.filter(p => p.position === 'F')[Math.floor(Math.random() * attackingSquad.firstTeam.filter(p => p.position === 'F').length)] || attackingSquad.firstTeam[0],
-          winger: attackingSquad.firstTeam.filter(p => p.position === 'O')[Math.floor(Math.random() * attackingSquad.firstTeam.filter(p => p.position === 'O').length)] || attackingSquad.firstTeam[0],
-          striker: attackingSquad.firstTeam.filter(p => p.position === 'F')[Math.floor(Math.random() * attackingSquad.firstTeam.filter(p => p.position === 'F').length)] || attackingSquad.firstTeam[0],
-          passer1: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          passer2: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)],
-          passer3: attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)]
+          attackingPlayer: pick(attackingSquad.firstTeam),
+          defendingPlayer: pick(defendingSquad.firstTeam),
+          midfielder: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
+          goalkeeper: byPos(defendingSquad, 'K')[0] || defendingSquad.firstTeam[0],
+          cornerTaker: pick(attackingSquad.firstTeam),
+          freeKickTaker: pick(attackingSquad.firstTeam),
+          passer: pick(attackingSquad.firstTeam),
+          headerPlayer: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
+          winger: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
+          striker: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
+          passer1: pick(attackingSquad.firstTeam),
+          passer2: pick(attackingSquad.firstTeam),
+          passer3: pick(attackingSquad.firstTeam)
         };
+
+        // Saha bölgesi haritası
+        const zones = SCENARIO_ZONES[scenario.name] || ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'];
 
         // Pozisyon adımlarını oluştur
         for (let step = 0; step < scenario.steps.length; step++) {
@@ -651,52 +830,76 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
 
           events.push({
             minute, type: 'position', team: attackingTeam,
-            description, step: step + 1, totalSteps: scenario.steps.length
+            description, step: step + 1, totalSteps: scenario.steps.length,
+            zone: zones[step] || 'midfield-center',
+            scenarioName: scenario.name
           });
         }
 
-        // Pozisyon sonucu
+        // Pozisyon sonucu — momentum bazlı gol olasılığı
         const attackingStrength = calculateTeamStrength(
-          attackingTeam === 'home' ? homeSquad : awaySquad,
-          attackingTeam === 'home' ? homeManager : awayManager,
-          [], [], attackingTeam === 'home'
+          attackingSquad, attackingManager, [], [], attackingTeam === 'home'
         );
         const defendingStrength = calculateTeamStrength(
-          defendingTeam === 'home' ? homeSquad : awaySquad,
-          defendingTeam === 'home' ? homeManager : awayManager,
-          [], [], defendingTeam === 'home'
+          defendingSquad, defendingTeam === 'home' ? homeManager : awayManager, [], [], defendingTeam === 'home'
         );
 
-        const successChance = attackingStrength / (attackingStrength + defendingStrength);
+        const attackMomentum = calculateMomentum(
+          attackingTeam === 'home' ? simHomeScore - simAwayScore : simAwayScore - simHomeScore,
+          lastGoalTeam === attackingTeam && lastGoalMinute ? minute - lastGoalMinute : null,
+          attackingTeam === 'home'
+        );
+        const goalProb = calculateGoalProbability(attackingStrength, defendingStrength, attackMomentum, minute);
+        const cornerProb = goalProb + 0.20;
         const random = Math.random();
 
-        if (random < successChance * 0.3) {
-          const scorer = attackingSquad.firstTeam[Math.floor(Math.random() * attackingSquad.firstTeam.length)];
+        if (random < goalProb) {
+          const scorer = pick(attackingSquad.firstTeam);
           events.push({
             minute, type: 'goal', team: attackingTeam,
             description: `⚽ GOL! ${attackingTeam === 'home' ? homeTeamName : awayTeamName}li ${scorer ? scorer.name : 'Oyuncu'} gol attı!`,
-            player: scorer ? scorer.name : 'Oyuncu'
+            player: scorer ? scorer.name : 'Oyuncu',
+            zone: 'attack-center'
           });
           if (attackingTeam === 'home') simHomeScore++;
           else simAwayScore++;
-        } else if (random < successChance * 0.6) {
+          lastGoalMinute = minute;
+          lastGoalTeam = attackingTeam;
+        } else if (random < cornerProb) {
           events.push({
             minute, type: 'corner', team: attackingTeam,
-            description: `Korner vuruşu ${attackingTeam === 'home' ? homeTeamName : awayTeamName} için`
+            description: `Korner vuruşu ${attackingTeam === 'home' ? homeTeamName : awayTeamName} için`,
+            zone: 'attack-right'
           });
         } else {
           events.push({
             minute, type: 'position_lost', team: defendingTeam,
-            description: `Pozisyon ${defendingTeam === 'home' ? homeTeamName : awayTeamName} tarafından temizlendi`
+            description: `Pozisyon ${defendingTeam === 'home' ? homeTeamName : awayTeamName} tarafından temizlendi`,
+            zone: 'defense-center'
           });
         }
       }
     }
+    // Dolgu olayları (atmosfer: save, offside, foul, throw_in)
+    else if (Math.random() < 0.08) {
+      const team = Math.random() < 0.5 ? 'home' : 'away';
+      const squad = team === 'home' ? homeSquad : awaySquad;
+      const opponentSquad = team === 'home' ? awaySquad : homeSquad;
+      const teamName = team === 'home' ? homeTeamName : awayTeamName;
+      if (squad && opponentSquad && squad.firstTeam.length > 0 && opponentSquad.firstTeam.length > 0) {
+        const fillerEvent = generateFillerEvent(minute, team, squad, teamName, opponentSquad);
+        fillerEvent.zone = 'midfield-center';
+        events.push(fillerEvent);
+      }
+    }
 
     // Diğer olaylar (kart, sakatlık)
-    const random = Math.random();
+    const cardRandom = Math.random();
 
-    if (random < 0.015) {
+    // İkinci yarı yorgunluk bölgesi: sakatlık ihtimali artar
+    const injuryThreshold = (minute >= 60 && minute <= 80) ? 0.055 : 0.035;
+
+    if (cardRandom < 0.015) {
       const team = Math.random() < 0.5 ? 'home' : 'away';
       const teamName = team === 'home' ? homeTeamName : awayTeamName;
       const squad = team === 'home' ? homeSquad : awaySquad;
@@ -707,7 +910,7 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
         description: `🟨 ${teamName}li ${player ? player.name : 'Oyuncu'} sert müdahalesi nedeniyle sarı kart gördü!`,
         player
       });
-    } else if (random < 0.016) {
+    } else if (cardRandom < 0.016) {
       const team = Math.random() < 0.5 ? 'home' : 'away';
       const teamName = team === 'home' ? homeTeamName : awayTeamName;
       const squad = team === 'home' ? homeSquad : awaySquad;
@@ -718,7 +921,7 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
         description: `🟥 ${teamName}li ${player ? player.name : 'Oyuncu'} çok sert müdahalesi nedeniyle kırmızı kart gördü!`,
         player
       });
-    } else if (random < 0.035) {
+    } else if (cardRandom < injuryThreshold) {
       const team = Math.random() < 0.5 ? 'home' : 'away';
       const squad = team === 'home' ? homeSquad : awaySquad;
 
