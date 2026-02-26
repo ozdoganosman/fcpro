@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const MatchControls = ({ isPlaying, matchEnded, onTogglePlay, onFastForward, onContinue }) => {
+const MatchControls = ({ isPlaying, matchEnded, playbackSpeed, onTogglePlay, onFastForward, onContinue, onSpeedChange }) => {
   if (matchEnded) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
@@ -21,7 +21,7 @@ const MatchControls = ({ isPlaying, matchEnded, onTogglePlay, onFastForward, onC
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px', alignItems: 'center' }}>
       <button
         className="fc-btn"
         onClick={onTogglePlay}
@@ -33,6 +33,27 @@ const MatchControls = ({ isPlaying, matchEnded, onTogglePlay, onFastForward, onC
       >
         {isPlaying ? 'Duraklat' : 'Başlat'}
       </button>
+
+      {/* Hız kontrolleri */}
+      <div style={{ display: 'flex', gap: '4px' }}>
+        {[1, 2, 4].map(speed => (
+          <button
+            key={speed}
+            className="fc-btn"
+            onClick={() => onSpeedChange(speed)}
+            style={{
+              background: playbackSpeed === speed ? 'var(--gold)' : '#888',
+              color: 'white', padding: '8px 12px', border: 'none',
+              borderRadius: '6px', cursor: 'pointer', fontSize: '12px',
+              fontWeight: playbackSpeed === speed ? 'bold' : 'normal',
+              minWidth: '36px', transition: 'background 0.2s'
+            }}
+          >
+            {speed}x
+          </button>
+        ))}
+      </div>
+
       <button
         className="fc-btn"
         onClick={onFastForward}
@@ -51,9 +72,11 @@ const MatchControls = ({ isPlaying, matchEnded, onTogglePlay, onFastForward, onC
 MatchControls.propTypes = {
   isPlaying: PropTypes.bool.isRequired,
   matchEnded: PropTypes.bool.isRequired,
+  playbackSpeed: PropTypes.number.isRequired,
   onTogglePlay: PropTypes.func.isRequired,
   onFastForward: PropTypes.func.isRequired,
-  onContinue: PropTypes.func.isRequired
+  onContinue: PropTypes.func.isRequired,
+  onSpeedChange: PropTypes.func.isRequired
 };
 
 export default MatchControls;

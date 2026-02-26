@@ -28,7 +28,7 @@ StatBar.propTypes = {
 };
 
 const MatchStatsPanel = ({ stats, matchEnded }) => {
-  if (!matchEnded || !stats) return null;
+  if (!stats) return null;
 
   const totalPossession = stats.homePossession + stats.awayPossession;
   const homePossessionPct = totalPossession > 0 ? Math.round((stats.homePossession / totalPossession) * 100) : 50;
@@ -36,19 +36,28 @@ const MatchStatsPanel = ({ stats, matchEnded }) => {
 
   return (
     <div style={{
-      background: '#f9f9f9', borderRadius: '8px', padding: '15px', marginTop: '15px'
+      background: '#f9f9f9', borderRadius: '8px', padding: matchEnded ? '15px' : '10px',
+      marginTop: '10px'
     }}>
-      <h5 style={{
-        margin: '0 0 12px 0', textAlign: 'center',
-        color: 'var(--blue)', fontSize: '14px', fontWeight: 'bold'
-      }}>
-        MAÇ İSTATİSTİKLERİ
-      </h5>
+      {matchEnded && (
+        <h5 style={{
+          margin: '0 0 12px 0', textAlign: 'center',
+          color: 'var(--blue)', fontSize: '14px', fontWeight: 'bold'
+        }}>
+          MAÇ İSTATİSTİKLERİ
+        </h5>
+      )}
       <StatBar label="Topla Oynama %" homeValue={homePossessionPct} awayValue={awayPossessionPct} />
       <StatBar label="Şut" homeValue={stats.homeShots} awayValue={stats.awayShots} />
-      <StatBar label="İsabetli Şut" homeValue={stats.homeShotsOnTarget} awayValue={stats.awayShotsOnTarget} />
-      <StatBar label="Korner" homeValue={stats.homeCorners} awayValue={stats.awayCorners} />
-      <StatBar label="Faul" homeValue={stats.homeFouls} awayValue={stats.awayFouls} />
+      {matchEnded && (
+        <>
+          <StatBar label="İsabetli Şut" homeValue={stats.homeShotsOnTarget} awayValue={stats.awayShotsOnTarget} />
+          <StatBar label="Korner" homeValue={stats.homeCorners} awayValue={stats.awayCorners} />
+          <StatBar label="Faul" homeValue={stats.homeFouls} awayValue={stats.awayFouls} />
+          <StatBar label="Kurtarış" homeValue={stats.homeSaves || 0} awayValue={stats.awaySaves || 0} />
+          <StatBar label="Ofsayt" homeValue={stats.homeOffsides || 0} awayValue={stats.awayOffsides || 0} />
+        </>
+      )}
     </div>
   );
 };
