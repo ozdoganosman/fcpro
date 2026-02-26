@@ -19,22 +19,26 @@ export const loadTurkishLeaguesFromCSV = async () => {
     let position = 1;
     let currentLeague = '';
     
+    // Takım isimlerini tüm ligler genelinde takip et (duplike önleme)
+    const addedTeams = new Set();
+
     for (const line of lines) {
       if (line.trim()) {
         const [takim, lig, deger] = line.split(',').map(item => item.trim());
-        
-        if (lig && leagues[lig]) {
+
+        if (lig && leagues[lig] && takim && !addedTeams.has(takim)) {
           // Yeni lig başladığında pozisyonu sıfırla
           if (currentLeague !== lig) {
             currentLeague = lig;
             position = 1;
           }
-          
+
           leagues[lig].push({
             name: takim,
             value: parseFloat(deger),
             position: position++
           });
+          addedTeams.add(takim);
         }
       }
     }
@@ -150,20 +154,20 @@ export const generatePreSeasonFixtures = (selectedTeam) => {
 export const generateRealisticFixtures = (teams) => {
   const fixtures = [];
   const teamNames = teams.map(team => team.name);
-  const numTeams = teamNames.length;
-  
+
   // Tek sayılı takım varsa "BYE" ekle
-  if (numTeams % 2 !== 0) {
+  if (teamNames.length % 2 !== 0) {
     teamNames.push('BYE');
   }
-  
+
+  const numTeams = teamNames.length; // BYE eklendikten sonra sayı
   const totalWeeks = numTeams - 1;
   const teamsCopy = [...teamNames];
-  
+
   // Berger Table algoritması ile fikstür oluştur
   for (let round = 0; round < totalWeeks; round++) {
     const roundFixtures = [];
-    
+
     // Her hafta için maçları oluştur
     for (let i = 0; i < Math.floor(numTeams / 2); i++) {
       const homeIndex = i;

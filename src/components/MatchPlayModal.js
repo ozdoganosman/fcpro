@@ -45,65 +45,6 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
         continue;
       }
       
-      // Kart olayları (%8 olasılık)
-      if (Math.random() < 0.08) {
-        const cardTeam = Math.random() < 0.5 ? 'home' : 'away';
-        const teamName = cardTeam === 'home' ? homeTeam : awayTeam;
-        const squad = Object.keys(allSquads).find(league => allSquads[league][teamName]) ? 
-          allSquads[Object.keys(allSquads).find(league => allSquads[league][teamName])][teamName] : null;
-        
-        if (squad && squad.firstTeam.length > 0) {
-          const player = squad.firstTeam[Math.floor(Math.random() * squad.firstTeam.length)];
-          const cardType = Math.random() < 0.7 ? 'yellow' : 'red';
-          
-          events.push({
-            minute: minute,
-            type: 'card',
-            team: cardTeam,
-            player: player,
-            cardType: cardType,
-            description: `${minute}' ${cardType === 'yellow' ? '🟡' : '🔴'} ${player.name} ${cardType === 'yellow' ? 'sarı kart' : 'kırmızı kart'} gördü`
-          });
-        }
-      }
-      
-      // Sakatlık olayları (%3 olasılık)
-      if (Math.random() < 0.03) {
-        const injuryTeam = Math.random() < 0.5 ? 'home' : 'away';
-        const teamName = injuryTeam === 'home' ? homeTeam : awayTeam;
-        const squad = Object.keys(allSquads).find(league => allSquads[league][teamName]) ? 
-          allSquads[Object.keys(allSquads).find(league => allSquads[league][teamName])][teamName] : null;
-        
-        if (squad && squad.firstTeam.length > 0) {
-          // Enerjisi düşük oyuncuların sakatlanma ihtimali daha yüksek
-          const availablePlayers = squad.firstTeam.filter(p => p.energy > 0);
-          if (availablePlayers.length > 0) {
-            // Enerji seviyesine göre ağırlıklı seçim
-            const weights = availablePlayers.map(p => Math.max(0.1, 1 - (p.energy / 100)));
-            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-            let random = Math.random() * totalWeight;
-            let selectedIndex = 0;
-            
-            for (let i = 0; i < weights.length; i++) {
-              random -= weights[i];
-              if (random <= 0) {
-                selectedIndex = i;
-                break;
-              }
-            }
-            
-            const player = availablePlayers[selectedIndex];
-            events.push({
-              minute: minute,
-              type: 'injury',
-              team: injuryTeam,
-              player: player,
-              description: `${minute}' 🏥 ${player.name} sakatlandı`
-            });
-          }
-        }
-      }
-      
       // Pozisyon başlatma olasılığı (%15)
       if (Math.random() < 0.15) {
         const homeStrength = calculateTeamStrength(homeTeam);
@@ -373,13 +314,16 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
     
     // Mevcut oyuncuların ortalama gücü
     const firstTeamStrength = availablePlayers.reduce((sum, player) => {
-      const form = player.form[0]?.value || 0; // Form
-      const fitness = player.form[1]?.value || 0; // Fitness
-      const morale = player.form[2]?.value || 0; // Morale
+      const formData = player.form?.[0];
+      const fitnessData = player.form?.[1];
+      const moraleData = player.form?.[2];
+      const formValue = formData ? (formData.type === 'negative' ? -formData.value : formData.value) : 0;
+      const fitnessValue = fitnessData ? (fitnessData.type === 'negative' ? -fitnessData.value : fitnessData.value) : 0;
+      const moraleValue = moraleData ? (moraleData.type === 'negative' ? -moraleData.value : moraleData.value) : 0;
       const energy = player.energy || 100;
-      
+
       // Oyuncu gücü = Rating + Form + Fitness + Morale + Enerji etkisi
-      const playerStrength = player.rating + form + fitness + morale + (energy - 100) * 0.1;
+      const playerStrength = player.rating + formValue + fitnessValue + moraleValue + (energy - 100) * 0.1;
       return sum + playerStrength;
     }, 0) / availablePlayers.length;
     
@@ -1105,9 +1049,9 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
     
     // Dakika başına enerji düşüşü hesapla
     const calculateMinuteEnergyLoss = (player) => {
-      const fitness = player.form[1]; // Fitness değeri
+      const fitness = player.form?.[1]; // Fitness değeri
       let baseEnergyLossPerMinute = 0.15; // Dakika başına temel düşüş
-      
+
       if (fitness && fitness.type === 'positive') {
         // Pozitif fitness: daha az enerji kaybı
         baseEnergyLossPerMinute = Math.max(0.05, baseEnergyLossPerMinute - (fitness.value * 0.03));

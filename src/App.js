@@ -151,18 +151,16 @@ function App() {
         case 'redCard':
           newPlayerStats[playerName].redCards++;
           break;
-        case 'injury':
-          // Sadece hazırlık maçlarında sakatlık kaydet
-          if (currentMatch.type === 'friendly') {
-            const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
-            newPlayerStats[playerName].injuries.push({
-              type: event.injuryType || 'Sakatlık',
-              matchesOut: matchesOut,
-              week: gameTime.week
-            });
-            console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
-          }
+        case 'injury': {
+          // Tüm maç tiplerinde sakatlık kaydet
+          const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
+          newPlayerStats[playerName].injuries.push({
+            type: event.injuryType || 'Sakatlık',
+            matchesOut: matchesOut,
+            week: gameTime.week
+          });
           break;
+        }
       }
     });
     
@@ -193,9 +191,7 @@ function App() {
       }
       
       // Maç sonucu fikstüre kaydedildi, lig tablosu otomatik güncellenecek
-      
-      // Diğer takımların maçlarını da çalıştır
-      generateOtherTeamResults();
+      // Diğer takımların maçları OtherMatchesModal açıldığında useEffect ile çalışacak
     } else if (currentMatch.type === 'friendly' && currentMatch.fixture) {
       // Hazırlık maçı sonucunu fikstüre ekle
       const currentWeek = gameTime.week;
