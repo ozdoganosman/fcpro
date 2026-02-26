@@ -318,9 +318,13 @@ const SquadModal = ({ setShowSquad, club, selectedTeam = null, playerStats = {} 
   };
 
   const renderFormFitnessMorale = (formData) => {
-    const form = formData[0]?.value || 0;
-    const fitness = formData[1]?.value || 0;
-    const morale = formData[2]?.value || 0;
+    const getSignedValue = (item) => {
+      if (!item || item.value === 0) return 0;
+      return item.type === 'negative' ? -item.value : item.value;
+    };
+    const form = getSignedValue(formData[0]);
+    const fitness = getSignedValue(formData[1]);
+    const morale = getSignedValue(formData[2]);
     
     return (
       <div style={{ display: 'flex', gap: '2px', fontSize: '11px' }}>

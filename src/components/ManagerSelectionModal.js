@@ -46,12 +46,16 @@ const ManagerSelectionModal = ({ setShowManagerSelection, onManagerSelect, leagu
     }
   };
 
-  const handleRejectAndWait = () => {
-    // Yeni menajer adayları oluştur
-    generateManagerCandidates(leagueName);
-    // Burada state'i güncellemek için bir callback gerekebilir
-    // Şimdilik sadece modal'ı kapatıyoruz
-    setShowManagerSelection(false);
+  const handleRejectAndWait = async () => {
+    setLoading(true);
+    try {
+      const newCandidates = await generateManagerCandidates(leagueName, teamValue);
+      setManagerCandidates(newCandidates);
+      setSelectedManager(null);
+    } catch (error) {
+      console.error('Yeni menajer adayları oluşturulurken hata:', error);
+    }
+    setLoading(false);
   };
 
   const renderManagerCard = (manager) => (

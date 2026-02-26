@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const PitchImprovementModal = ({ setShowPitchImprovement, club, onShowStadium }) => {
+const PitchImprovementModal = ({ setShowPitchImprovement, club, setClub, onShowStadium }) => {
   const [newLevel, setNewLevel] = useState(41);
 
   const currentLevel = 40; // Mevcut saha kalitesi
@@ -21,8 +21,8 @@ const PitchImprovementModal = ({ setShowPitchImprovement, club, onShowStadium })
 
   const handleUpgrade = () => {
     if (upgradeCost <= club.money && newLevel > currentLevel) {
-      club.money -= upgradeCost; // Para düşüldü
-      alert(`Saha kalitesi ${currentLevel}'den ${newLevel}'e yükseltildi! Kalan bakiye: ${club.money.toLocaleString()} TL`);
+      setClub(prev => ({ ...prev, money: prev.money - upgradeCost }));
+      alert(`Saha kalitesi ${currentLevel}'den ${newLevel}'e yükseltildi! Kalan bakiye: ${(club.money - upgradeCost).toLocaleString()} TL`);
       setShowPitchImprovement(false);
     } else if (newLevel === currentLevel) {
       alert('Saha zaten mevcut seviyede.');
@@ -267,6 +267,7 @@ const PitchImprovementModal = ({ setShowPitchImprovement, club, onShowStadium })
 PitchImprovementModal.propTypes = {
   setShowPitchImprovement: PropTypes.func.isRequired,
   club: PropTypes.object.isRequired,
+  setClub: PropTypes.func.isRequired,
   onShowStadium: PropTypes.func.isRequired,
 };
 
