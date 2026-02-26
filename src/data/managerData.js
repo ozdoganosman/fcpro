@@ -1,12 +1,12 @@
+import { fetchCSV } from './csvCache';
+
 // CSV verilerini yükleme fonksiyonu
 const loadCSVData = async () => {
   try {
-    const skillResponse = await fetch(`${process.env.PUBLIC_URL}/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv`);
-    const skillText = await skillResponse.text();
+    const skillText = await fetchCSV('Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv');
     const skillLines = skillText.split('\n').slice(1); // Header'ı atla
-    
-    const salaryResponse = await fetch(`${process.env.PUBLIC_URL}/Manager_Salary_Table__20_100__step_1_.csv`);
-    const salaryText = await salaryResponse.text();
+
+    const salaryText = await fetchCSV('Manager_Salary_Table__20_100__step_1_.csv');
     const salaryLines = salaryText.split('\n').slice(1); // Header'ı atla
     
     const skillData = {};

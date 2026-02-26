@@ -1,17 +1,17 @@
-import { 
-  generateRandomName, 
-  generateRandomAge, 
-  generateContractEnd, 
+import {
+  generateRandomName,
+  generateRandomAge,
+  generateContractEnd,
   generateFormFitnessMorale,
   calculatePlayerSalary,
   calculateEnergyLevel
 } from './turkishNames';
+import { fetchCSV } from './csvCache';
 
 // CSV'den takım değerini al ve oyuncu yeteneklerini hesapla
 const getTeamValueFromCSV = async (teamName) => {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
-    const csvText = await response.text();
+    const csvText = await fetchCSV('turkish_leagues_with_values.csv');
     const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
     
     for (const line of lines) {
@@ -32,8 +32,7 @@ const getTeamValueFromCSV = async (teamName) => {
 // CSV'den oyuncu yetenek seviyesini hesapla
 const getPlayerSkillLevel = async (teamValue) => {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL}/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv`);
-    const csvText = await response.text();
+    const csvText = await fetchCSV('Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv');
     const lines = csvText.split('\n').slice(1); // İlk satırı atla
     
     const kadroData = lines.map(line => {

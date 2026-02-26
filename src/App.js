@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import TrainingMenu from './TrainingMenu';
-import { createClubData, loadTurkishLeaguesFromCSV, advanceWeek, generateRealisticFixtures } from './data';
+import { createClubData, loadTurkishLeaguesFromCSV, advanceWeek, generateRealisticFixtures, allSquads } from './data';
 import './styles.css';
 import FinanceModal from './components/FinanceModal';
 import StandingsModal from './components/StandingsModal';
@@ -145,24 +145,21 @@ function App() {
         case 'assist':
           newPlayerStats[playerName].assists++;
           break;
-        case 'yellowCard':
+        case 'yellow':
           newPlayerStats[playerName].yellowCards++;
           break;
-        case 'redCard':
+        case 'red':
           newPlayerStats[playerName].redCards++;
           break;
-        case 'injury':
-          // Sadece hazırlık maçlarında sakatlık kaydet
-          if (currentMatch.type === 'friendly') {
-            const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
-            newPlayerStats[playerName].injuries.push({
-              type: event.injuryType || 'Sakatlık',
-              matchesOut: matchesOut,
-              week: gameTime.week
-            });
-            console.log(`${playerName} sakatlandı:`, newPlayerStats[playerName].injuries);
-          }
+        case 'injury': {
+          const matchesOut = Math.floor(Math.random() * 8) + 1; // 1-8 maç
+          newPlayerStats[playerName].injuries.push({
+            type: event.injuryType || 'Sakatlık',
+            matchesOut: matchesOut,
+            week: gameTime.week
+          });
           break;
+        }
       }
     });
     
@@ -464,6 +461,39 @@ function App() {
     };
   };
 
+  // Takım ortalama reytingini hesapla (diğer maçlar için)
+  const getTeamAverageRating = (teamName) => {
+    let squad = null;
+    Object.keys(allSquads).forEach(league => {
+      if (allSquads[league] && allSquads[league][teamName]) {
+        squad = allSquads[league][teamName];
+      }
+    });
+
+    if (!squad || !squad.firstTeam || squad.firstTeam.length === 0) return 50;
+
+    return squad.firstTeam.reduce((sum, p) => sum + p.rating, 0) / squad.firstTeam.length;
+  };
+
+  // Güç bazlı gerçekçi skor üret
+  const generateWeightedScore = (teamStrength, opponentStrength, isHome) => {
+    // Ev sahibi avantajı (%10)
+    const effectiveStrength = isHome ? teamStrength * 1.1 : teamStrength;
+    const ratio = effectiveStrength / (effectiveStrength + opponentStrength);
+
+    // Ortalama gol beklentisi: ratio bazlı, 0.8 ile 2.2 arası
+    const expectedGoals = 0.8 + ratio * 1.4;
+
+    // Poisson benzeri basit dağılım
+    let goals = 0;
+    for (let i = 0; i < 6; i++) {
+      if (Math.random() < expectedGoals / 6) {
+        goals++;
+      }
+    }
+    return Math.min(goals, 6);
+  };
+
   const generateOtherTeamResults = () => {
     if (!club) return;
     
@@ -493,9 +523,11 @@ function App() {
         let weekPlayedCount = 0;
         weekFixtures.forEach(fixture => {
           if (!fixture.played && fixture.homeTeam !== club.name && fixture.awayTeam !== club.name) {
-            // Rastgele skor üret (0-4 arası)
-            const homeScore = Math.floor(Math.random() * 5);
-            const awayScore = Math.floor(Math.random() * 5);
+            // Takım güçlerine göre skor üret
+            const homeStrength = getTeamAverageRating(fixture.homeTeam);
+            const awayStrength = getTeamAverageRating(fixture.awayTeam);
+            const homeScore = generateWeightedScore(homeStrength, awayStrength, true);
+            const awayScore = generateWeightedScore(awayStrength, homeStrength, false);
             
             fixture.result = `${homeScore}-${awayScore}`;
             fixture.played = true;

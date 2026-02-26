@@ -1,12 +1,12 @@
 import { generateAllSquads } from './data/squadGenerator';
 import { generateAllYouthSquads } from './data/youthSquadGenerator';
 import { generateManager as generateManagerCSV } from './data/managerData';
+import { fetchCSV } from './data/csvCache';
 
 // CSV'den takım verilerini dinamik olarak yükle
 export const loadTurkishLeaguesFromCSV = async () => {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
-    const csvText = await response.text();
+    const csvText = await fetchCSV('turkish_leagues_with_values.csv');
     const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
     
     const leagues = {
@@ -346,10 +346,9 @@ export const createClubData = async (selectedTeam, leagueName) => {
   const getFacilityLevel = async (teamName) => {
     try {
       // turkish_leagues_with_values.csv'den takım değerini al
-      const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
-      const csvText = await response.text();
-      const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
-      
+      const csvText2 = await fetchCSV('turkish_leagues_with_values.csv');
+      const lines = csvText2.split('\n').slice(1); // İlk satırı atla (başlık)
+
       let teamValue = null;
       for (const line of lines) {
         const [takim, , deger] = line.split(','); // 'lig' değişkenini atla
@@ -358,15 +357,14 @@ export const createClubData = async (selectedTeam, leagueName) => {
           break;
         }
       }
-      
+
       if (!teamValue) {
         console.warn(`Takım değeri bulunamadı: ${teamName}`);
         return Math.floor(Math.random() * 11) + 25; // Varsayılan değer
       }
-      
+
       // Kadro_Yetenek_Listesi.csv'den interpolasyon yap
-      const kadroResponse = await fetch(`${process.env.PUBLIC_URL}/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv`);
-      const kadroText = await kadroResponse.text();
+      const kadroText = await fetchCSV('Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv');
       const kadroLines = kadroText.split('\n').slice(1); // İlk satırı atla
       
       const kadroData = kadroLines.map(line => {
