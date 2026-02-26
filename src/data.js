@@ -5,7 +5,7 @@ import { generateManager as generateManagerCSV } from './data/managerData';
 // CSV'den takım verilerini dinamik olarak yükle
 export const loadTurkishLeaguesFromCSV = async () => {
   try {
-    const response = await fetch('/turkish_leagues_with_values.csv');
+    const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
     const csvText = await response.text();
     const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
     
@@ -346,7 +346,7 @@ export const createClubData = async (selectedTeam, leagueName) => {
   const getFacilityLevel = async (teamName) => {
     try {
       // turkish_leagues_with_values.csv'den takım değerini al
-      const response = await fetch('/turkish_leagues_with_values.csv');
+      const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
       const csvText = await response.text();
       const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
       
@@ -365,7 +365,7 @@ export const createClubData = async (selectedTeam, leagueName) => {
       }
       
       // Kadro_Yetenek_Listesi.csv'den interpolasyon yap
-      const kadroResponse = await fetch('/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv');
+      const kadroResponse = await fetch(`${process.env.PUBLIC_URL}/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv`);
       const kadroText = await kadroResponse.text();
       const kadroLines = kadroText.split('\n').slice(1); // İlk satırı atla
       

@@ -10,7 +10,7 @@ import {
 // CSV'den takım değerini al ve oyuncu yeteneklerini hesapla
 const getTeamValueFromCSV = async (teamName) => {
   try {
-    const response = await fetch('/turkish_leagues_with_values.csv');
+    const response = await fetch(`${process.env.PUBLIC_URL}/turkish_leagues_with_values.csv`);
     const csvText = await response.text();
     const lines = csvText.split('\n').slice(1); // İlk satırı atla (başlık)
     
@@ -32,7 +32,7 @@ const getTeamValueFromCSV = async (teamName) => {
 // CSV'den oyuncu yetenek seviyesini hesapla
 const getPlayerSkillLevel = async (teamValue) => {
   try {
-    const response = await fetch('/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv');
+    const response = await fetch(`${process.env.PUBLIC_URL}/Kadro_Yetenek_Listesi__Vmin_2__Vmax_350__Ymin_20__Ymax_92_.csv`);
     const csvText = await response.text();
     const lines = csvText.split('\n').slice(1); // İlk satırı atla
     
