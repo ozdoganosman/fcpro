@@ -1,44 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-// ========== MINI SAHA GÖRSELİ ==========
-
-const MiniPitch = ({ currentZone }) => { // eslint-disable-line
-  const parts = (currentZone || 'midfield-center').split('-');
-  const vertical = parts[0];
-  const horizontal = parts[1] || 'center';
-  const colMap = { left: 0, center: 1, right: 2 };
-  const rowMap = { defense: 2, midfield: 1, attack: 0 };
-  const col = colMap[horizontal] || 1;
-  const row = rowMap[vertical] || 1;
-  const ballX = 15 + col * 35;
-  const ballY = 15 + row * 35;
-
-  return (
-    <div style={{
-      position: 'relative', width: '100%', height: '60px',
-      background: '#2d5a27', borderRadius: '6px', border: '2px solid rgba(255,255,255,0.4)',
-      marginBottom: '8px', overflow: 'hidden'
-    }}>
-      <div style={{ position: 'absolute', left: '50%', top: 0, width: '1px', height: '100%', background: 'rgba(255,255,255,0.25)' }} />
-      <div style={{ position: 'absolute', left: '50%', top: '50%', width: '18px', height: '18px', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '50%', transform: 'translate(-50%,-50%)' }} />
-      <div style={{ position: 'absolute', left: 0, top: '20%', width: '12%', height: '60%', border: '1px solid rgba(255,255,255,0.25)', borderLeft: 'none' }} />
-      <div style={{ position: 'absolute', right: 0, top: '20%', width: '12%', height: '60%', border: '1px solid rgba(255,255,255,0.25)', borderRight: 'none' }} />
-      <div style={{
-        position: 'absolute',
-        left: `${ballX}%`, top: `${ballY}%`,
-        width: '10px', height: '10px',
-        background: '#fff', borderRadius: '50%',
-        transform: 'translate(-50%, -50%)',
-        transition: 'left 0.5s ease, top 0.5s ease',
-        boxShadow: '0 0 8px rgba(255,255,255,0.8)'
-      }} />
-      <span style={{ position: 'absolute', left: '4px', bottom: '2px', fontSize: '7px', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>EV</span>
-      <span style={{ position: 'absolute', right: '4px', bottom: '2px', fontSize: '7px', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>DEP</span>
-    </div>
-  );
-};
-
 // ========== OLAY İKONLARI ==========
 
 const getEventIcon = (type) => {
@@ -104,7 +66,7 @@ const getEventStyle = (event) => {
 
 // ========== ANA BİLEŞEN ==========
 
-const MatchEventLog = ({ events, currentZone }) => {
+const MatchEventLog = ({ events }) => {
   useEffect(() => {
     const container = document.querySelector('.match-events-container');
     if (container) {
@@ -118,13 +80,11 @@ const MatchEventLog = ({ events, currentZone }) => {
       display: 'flex', flexDirection: 'column', height: '100%'
     }}>
       <h5 style={{
-        margin: '0 0 8px 0', textAlign: 'center',
-        color: 'var(--blue)', fontSize: '13px', fontWeight: 'bold'
+        margin: '0 0 6px 0', textAlign: 'center',
+        color: 'var(--blue)', fontSize: '12px', fontWeight: 'bold'
       }}>
         MAÇ OLAYLARI
       </h5>
-
-      <MiniPitch currentZone={currentZone} />
 
       <div
         className="match-events-container"
@@ -169,8 +129,7 @@ const MatchEventLog = ({ events, currentZone }) => {
 };
 
 MatchEventLog.propTypes = {
-  events: PropTypes.array.isRequired,
-  currentZone: PropTypes.string
+  events: PropTypes.array.isRequired
 };
 
 export default MatchEventLog;

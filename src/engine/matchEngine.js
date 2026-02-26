@@ -261,6 +261,191 @@ export const SCENARIO_ZONES = {
   'Kaleci Hatası': ['defense-center', 'defense-center', 'attack-center', 'attack-center']
 };
 
+// ========== SENARYO HAREKET HARİTALARI ==========
+// Her senaryo için 4 adımda hücum/savunma pozisyon gruplarının x/y offset değerleri
+// atk = hücum eden takım, def = savunan takım
+// K=Kaleci, D=Defans, O=Orta saha, F=Forvet
+
+const mv = (x, y) => ({ x, y }); // kısa yardımcı
+
+export const SCENARIO_MOVEMENTS = {
+  'Kontra Atak': {
+    1: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) }, def: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(10,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(8,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-10,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Kanat Oyunu': {
+    1: { atk: { K:mv(0,0), D:mv(0,0), O:mv(5,8), F:mv(5,0) }, def: { K:mv(0,0), D:mv(0,5), O:mv(0,3), F:mv(0,0) } },
+    2: { atk: { K:mv(0,0), D:mv(3,0), O:mv(10,10), F:mv(10,5) }, def: { K:mv(0,0), D:mv(-2,6), O:mv(-3,5), F:mv(-3,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,5), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,3), O:mv(-5,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,-5) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-8,0), F:mv(-12,0) } }
+  },
+  'Orta Saha Kontrolü': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(3,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-3,0), F:mv(-5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(8,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-5,0), F:mv(-8,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-10,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Pas Oyunu': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(5,-3), F:mv(3,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-2,0), F:mv(-3,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(8,3), F:mv(5,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-5,0), F:mv(-5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,5), F:mv(12,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-6,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(14,0), F:mv(20,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-12,0) } }
+  },
+  'Korner Pozisyonu': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,6), F:mv(10,5) }, def: { K:mv(0,0), D:mv(0,3), O:mv(0,0), F:mv(0,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,3), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-8,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-8,0), F:mv(-12,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-10,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Serbest Vuruş': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-10,0), O:mv(-12,0), F:mv(-18,0) } }
+  },
+  'Dribling': {
+    1: { atk: { K:mv(0,0), D:mv(0,0), O:mv(3,0), F:mv(5,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-2,0), F:mv(-3,0) } },
+    2: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-10,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Uzun Pas': {
+    1: { atk: { K:mv(0,0), D:mv(-2,0), O:mv(-3,0), F:mv(0,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(5,0), F:mv(12,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(0,0) } },
+    3: { atk: { K:mv(0,0), D:mv(3,0), O:mv(10,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } }
+  },
+  'Hızlı Atak': {
+    1: { atk: { K:mv(0,0), D:mv(0,0), O:mv(5,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(3,0), F:mv(5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(3,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-3,0), F:mv(-5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Uzun Şut': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(3,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(-3,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(5,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-3,0), F:mv(-5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(12,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } }
+  },
+  'Kafa Vuruşu': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(10,5), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(20,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-10,0), O:mv(-12,0), F:mv(-18,0) } }
+  },
+  'Savunma Müdahalesi': {
+    1: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(-5,0), F:mv(-10,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(8,0) } },
+    3: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(3,0), F:mv(5,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(3,0), F:mv(5,0) } },
+    4: { atk: { K:mv(0,0), D:mv(0,0), O:mv(8,0), F:mv(12,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-5,0) } }
+  },
+  'Savunma Bloku': {
+    1: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(-5,0), F:mv(-10,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(8,0) } },
+    3: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) }, def: { K:mv(0,0), D:mv(5,0), O:mv(5,0), F:mv(8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-10,0) }, def: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(10,0) } }
+  },
+  'Kısa Pas Oyunu': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(3,-3), F:mv(0,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-2,0), F:mv(-3,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(5,3), F:mv(3,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-3,0), F:mv(-5,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(8,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(12,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } }
+  },
+  'Kaleci Kurtarışı': {
+    1: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } },
+    3: { atk: { K:mv(0,0), D:mv(0,0), O:mv(-5,0), F:mv(-10,0) }, def: { K:mv(0,0), D:mv(5,0), O:mv(5,0), F:mv(8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) }, def: { K:mv(0,0), D:mv(5,0), O:mv(8,0), F:mv(10,0) } }
+  },
+  'Savunma Hatası': {
+    1: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-5,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(5,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(0,0) } },
+    3: { atk: { K:mv(0,0), D:mv(3,0), O:mv(10,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  },
+  'Ofsayt Pozisyonu': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,0), F:mv(12,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-3,0), F:mv(-5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(20,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-8,0) } },
+    3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-8,0) } },
+    4: { atk: { K:mv(0,0), D:mv(0,0), O:mv(-5,0), F:mv(-10,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(5,0), F:mv(5,0) } }
+  },
+  'Kale Direği': {
+    1: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-3,0), F:mv(-5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-10,0) } },
+    3: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } }
+  },
+  'Penaltı Pozisyonu': {
+    1: { atk: { K:mv(0,0), D:mv(5,0), O:mv(10,0), F:mv(15,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-12,0) } },
+    2: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-15,0) } },
+    3: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } },
+    4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(18,0), F:mv(25,0) }, def: { K:mv(0,0), D:mv(-10,0), O:mv(-12,0), F:mv(-18,0) } }
+  },
+  'Kaleci Hatası': {
+    1: { atk: { K:mv(0,0), D:mv(-3,0), O:mv(-5,0), F:mv(-5,0) }, def: { K:mv(0,0), D:mv(3,0), O:mv(3,0), F:mv(5,0) } },
+    2: { atk: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(3,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(0,0), F:mv(0,0) } },
+    3: { atk: { K:mv(0,0), D:mv(3,0), O:mv(10,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-5,0), F:mv(-10,0) } },
+    4: { atk: { K:mv(0,0), D:mv(5,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+  }
+};
+
+export const DEFAULT_MOVEMENT = {
+  1: { atk: { K:mv(0,0), D:mv(2,0), O:mv(5,0), F:mv(5,0) }, def: { K:mv(0,0), D:mv(0,0), O:mv(-2,0), F:mv(-3,0) } },
+  2: { atk: { K:mv(0,0), D:mv(3,0), O:mv(8,0), F:mv(10,0) }, def: { K:mv(0,0), D:mv(-2,0), O:mv(-5,0), F:mv(-5,0) } },
+  3: { atk: { K:mv(0,0), D:mv(5,0), O:mv(12,0), F:mv(18,0) }, def: { K:mv(0,0), D:mv(-5,0), O:mv(-8,0), F:mv(-10,0) } },
+  4: { atk: { K:mv(0,0), D:mv(8,0), O:mv(15,0), F:mv(22,0) }, def: { K:mv(0,0), D:mv(-8,0), O:mv(-10,0), F:mv(-15,0) } }
+};
+
+// ========== TOP TAŞIYICI VE AKTİF OYUNCU ==========
+
+/** Senaryo ve adıma göre topu taşıyan oyuncunun adını döndür */
+const getBallCarrierForStep = (scenarioName, step, players) => {
+  const carriers = {
+    'Kontra Atak': [players.goalkeeper, players.midfielder, players.midfielder, players.striker],
+    'Kanat Oyunu': [players.winger, players.winger, players.striker, players.striker],
+    'Orta Saha Kontrolü': [players.attackingPlayer, players.attackingPlayer, players.defendingPlayer, players.defendingPlayer],
+    'Pas Oyunu': [players.passer1, players.passer2, players.passer3, players.striker],
+    'Korner Pozisyonu': [players.attackingPlayer, players.defendingPlayer, players.cornerTaker, players.headerPlayer],
+    'Serbest Vuruş': [players.attackingPlayer, players.freeKickTaker, players.freeKickTaker, players.freeKickTaker],
+    'Dribling': [players.attackingPlayer, players.attackingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Uzun Pas': [players.defendingPlayer, players.attackingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Hızlı Atak': [players.attackingPlayer, players.attackingPlayer, players.attackingPlayer, players.goalkeeper],
+    'Uzun Şut': [players.attackingPlayer, players.attackingPlayer, players.goalkeeper, players.attackingPlayer],
+    'Kafa Vuruşu': [players.cornerTaker, players.cornerTaker, players.headerPlayer, players.headerPlayer],
+    'Savunma Müdahalesi': [players.attackingPlayer, players.defendingPlayer, players.midfielder, players.midfielder],
+    'Savunma Bloku': [players.attackingPlayer, players.defendingPlayer, players.defendingPlayer, players.defendingPlayer],
+    'Kısa Pas Oyunu': [players.passer1, players.passer2, players.passer2, players.passer2],
+    'Kaleci Kurtarışı': [players.attackingPlayer, players.attackingPlayer, players.goalkeeper, players.goalkeeper],
+    'Savunma Hatası': [players.defendingPlayer, players.defendingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Ofsayt Pozisyonu': [players.attackingPlayer, players.attackingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Kale Direği': [players.attackingPlayer, players.attackingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Penaltı Pozisyonu': [players.attackingPlayer, players.defendingPlayer, players.attackingPlayer, players.attackingPlayer],
+    'Kaleci Hatası': [players.goalkeeper, players.goalkeeper, players.attackingPlayer, players.attackingPlayer]
+  };
+  const list = carriers[scenarioName] || [players.attackingPlayer, players.attackingPlayer, players.attackingPlayer, players.attackingPlayer];
+  const carrier = list[step];
+  return carrier?.name || players.attackingPlayer?.name || null;
+};
+
+/** Senaryo ve adıma göre ikincil (destek) oyuncunun adını döndür */
+const getSecondaryPlayer = (scenarioName, step, players) => {
+  const secondaries = {
+    'Kontra Atak': [null, players.attackingPlayer, players.striker, null],
+    'Kanat Oyunu': [null, players.striker, players.winger, players.headerPlayer],
+    'Orta Saha Kontrolü': [players.midfielder, null, players.attackingPlayer, null],
+    'Pas Oyunu': [players.passer2, players.passer3, players.striker, null],
+    'Korner Pozisyonu': [null, null, players.headerPlayer, null],
+    'Kafa Vuruşu': [null, players.headerPlayer, null, null],
+    'Hızlı Atak': [null, null, null, players.attackingPlayer],
+  };
+  const list = secondaries[scenarioName];
+  if (!list) return null;
+  const sec = list[step];
+  return sec?.name || null;
+};
+
 // ========== YARDIMCI FONKSİYONLAR ==========
 
 /** Form/fitness/morale değerini işaretli olarak döndür */
@@ -314,15 +499,15 @@ export const selectWeightedScenarioWithTactic = (tacticStyle) => {
   return adjustedScenarios[0];
 };
 
-/** Dakika bazlı olay olasılığı — gerçekçi kümelenme */
+/** Dakika bazlı senaryo başlatma olasılığı — yüksek aksiyon temposu */
 export const getMinuteEventProbability = (minute) => {
-  if (minute >= 1 && minute <= 5) return 0.20;
-  if (minute >= 20 && minute <= 35) return 0.10;
-  if (minute >= 40 && minute <= 45) return 0.22;
-  if (minute >= 46 && minute <= 50) return 0.18;
-  if (minute >= 55 && minute <= 65) return 0.12;
-  if (minute >= 85 && minute <= 90) return 0.25;
-  return 0.15;
+  if (minute >= 1 && minute <= 5) return 0.55;
+  if (minute >= 20 && minute <= 35) return 0.35;
+  if (minute >= 40 && minute <= 45) return 0.55;
+  if (minute >= 46 && minute <= 50) return 0.50;
+  if (minute >= 55 && minute <= 65) return 0.38;
+  if (minute >= 85 && minute <= 90) return 0.60;
+  return 0.42;
 };
 
 /** Momentum hesaplama (-1.0 ile +1.0 arası) */
@@ -554,6 +739,11 @@ export const createMatchState = (homeSquad, awaySquad) => ({
   awaySubstitutedPlayers: [],
   events: [],
   currentZone: 'midfield-center',
+  currentAttackingTeam: 'home',
+  currentScenarioName: null,
+  currentStep: 0,
+  currentTotalSteps: 0,
+  activePlayers: null,
   lastGoalMinute: null,
   lastGoalTeam: null,
   stats: {
@@ -589,7 +779,7 @@ export const processEvent = (event, matchState, homeTeamName, awayTeamName) => {
   }
 
   // Pozisyon (topla oynama takibi)
-  if (event.type === 'position') {
+  if (event.type === 'position' || event.type === 'idle') {
     if (isHome) matchState.stats.homePossession++;
     else matchState.stats.awayPossession++;
   }
@@ -626,10 +816,21 @@ export const processEvent = (event, matchState, homeTeamName, awayTeamName) => {
     else matchState.stats.awayFouls++;
   }
 
-  // Top bölgesi güncelle
+  // Top bölgesi ve senaryo durumu güncelle
   if (event.zone) {
     matchState.currentZone = event.zone;
+    matchState.currentAttackingTeam = event.team;
   }
+  if (event.scenarioName !== undefined) {
+    matchState.currentScenarioName = event.scenarioName;
+  } else if (event.type === 'idle' || event.type === 'goal' || event.type === 'corner' || event.type === 'position_lost') {
+    matchState.currentScenarioName = null;
+    matchState.currentStep = 0;
+    matchState.currentTotalSteps = 0;
+  }
+  if (event.step !== undefined) matchState.currentStep = event.step;
+  if (event.totalSteps !== undefined) matchState.currentTotalSteps = event.totalSteps;
+  matchState.activePlayers = event.activePlayers || null;
 
   // Sarı kart
   if (event.type === 'yellow') {
@@ -745,8 +946,37 @@ export const processEvent = (event, matchState, homeTeamName, awayTeamName) => {
   return additionalEvents;
 };
 
+// ========== IDLE OLAY VERİLERİ ==========
+
+const IDLE_ZONES_POOL = [
+  'midfield-left', 'midfield-center', 'midfield-right',
+  'midfield-center', 'midfield-left', 'midfield-right',
+  'defense-center', 'defense-left', 'defense-right',
+  'attack-left', 'attack-center', 'attack-right'
+];
+
+const IDLE_DESCRIPTIONS = [
+  '{team} orta sahada top dolaştırıyor',
+  '{team} kontrolü elinde tutuyor',
+  '{player} topla ilerliyor',
+  '{team} rakip yarı alana geçmeye çalışıyor',
+  '{player} takım arkadaşını arıyor',
+  '{team} savunma hattında pas yapıyor',
+  '{player} topu kazanıp ilerlemeye çalışıyor',
+  '{team} tempolu bir oyun sergiliyor',
+  '{player} pas seçeneklerini değerlendiriyor',
+  '{team} baskı kurmaya çalışıyor',
+  '{team} topa sahip, pozisyon arıyor',
+  '{player} topla birlikte yükseliyor',
+  '{team} yavaş tempo ile oyunu kontrol ediyor',
+  '{player} kısa pas ile oyunu yönlendiriyor',
+  '{team} savunma bloğunu kırmaya çalışıyor'
+];
+
 /**
- * Maçı önceden hesapla — tüm 90 dakikalık olayları üret.
+ * Maçı önceden hesapla — dakika dakika sürekli simülasyon.
+ * Her dakika en az bir olay üretir: senaryo adımı, dolgu veya idle.
+ * Senaryolar ardışık dakikalara yayılır (1 adım/dakika).
  * @returns {{ events: Object[], homeScore: number, awayScore: number }}
  */
 export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, homeTeamName, awayTeamName) => {
@@ -756,147 +986,214 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
   let lastGoalMinute = null;
   let lastGoalTeam = null;
 
-  // Taktik stili çıkar
+  // Aktif senaryo takibi — dakikalar arası taşınır
+  let activeScenario = null;
+
   const getStyle = (mgr) => mgr?.tactic?.includes('Dikine') ? 'Dikine Oyun' : 'Pas Oyunu';
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const byPos = (squad, pos) => squad.firstTeam.filter(p => p.position === pos);
+
+  /** Senaryo adımı açıklamasını oluştur */
+  const buildStepDescription = (template, players, attackingTeam, defendingTeam) => {
+    let desc = template;
+    Object.keys(players).forEach(key => {
+      if (players[key]?.name) desc = desc.replace(`{${key}}`, players[key].name);
+    });
+    desc = desc.replace('{attackingTeam}', attackingTeam === 'home' ? homeTeamName : awayTeamName);
+    desc = desc.replace('{defendingTeam}', defendingTeam === 'home' ? homeTeamName : awayTeamName);
+    return desc;
+  };
+
+  /** Yeni senaryo için oyuncu haritası oluştur */
+  const buildPlayers = (attackingSquad, defendingSquad) => ({
+    attackingPlayer: pick(attackingSquad.firstTeam),
+    defendingPlayer: pick(defendingSquad.firstTeam),
+    midfielder: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
+    goalkeeper: byPos(defendingSquad, 'K')[0] || defendingSquad.firstTeam[0],
+    cornerTaker: pick(attackingSquad.firstTeam),
+    freeKickTaker: pick(attackingSquad.firstTeam),
+    passer: pick(attackingSquad.firstTeam),
+    headerPlayer: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
+    winger: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
+    striker: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
+    passer1: pick(attackingSquad.firstTeam),
+    passer2: pick(attackingSquad.firstTeam),
+    passer3: pick(attackingSquad.firstTeam)
+  });
+
+  /** Senaryo sonucu üret (gol / korner / pozisyon kayıp) */
+  const emitScenarioOutcome = (minute, sc) => {
+    const { attackingTeam, defendingTeam, players } = sc;
+    const attackingSquad = attackingTeam === 'home' ? homeSquad : awaySquad;
+    const defendingSquad = defendingTeam === 'home' ? homeSquad : awaySquad;
+    const attackingMgr = attackingTeam === 'home' ? homeManager : awayManager;
+    const defendingMgr = defendingTeam === 'home' ? homeManager : awayManager;
+
+    const atkStr = calculateTeamStrength(attackingSquad, attackingMgr, [], [], attackingTeam === 'home');
+    const defStr = calculateTeamStrength(defendingSquad, defendingMgr, [], [], defendingTeam === 'home');
+    const atkMomentum = calculateMomentum(
+      attackingTeam === 'home' ? simHomeScore - simAwayScore : simAwayScore - simHomeScore,
+      lastGoalTeam === attackingTeam && lastGoalMinute ? minute - lastGoalMinute : null,
+      attackingTeam === 'home'
+    );
+    const goalProb = calculateGoalProbability(atkStr, defStr, atkMomentum, minute);
+    const cornerProb = goalProb + 0.20;
+    const random = Math.random();
+
+    if (random < goalProb) {
+      const scorer = pick(attackingSquad.firstTeam);
+      events.push({
+        minute, type: 'goal', team: attackingTeam,
+        description: `⚽ GOL! ${attackingTeam === 'home' ? homeTeamName : awayTeamName}li ${scorer ? scorer.name : 'Oyuncu'} gol attı!`,
+        player: scorer ? scorer.name : 'Oyuncu',
+        zone: 'attack-center',
+        activePlayers: { ballCarrier: scorer?.name, goalkeeper: players.goalkeeper?.name }
+      });
+      if (attackingTeam === 'home') simHomeScore++;
+      else simAwayScore++;
+      lastGoalMinute = minute;
+      lastGoalTeam = attackingTeam;
+    } else if (random < cornerProb) {
+      events.push({
+        minute, type: 'corner', team: attackingTeam,
+        description: `Korner vuruşu ${attackingTeam === 'home' ? homeTeamName : awayTeamName} için`,
+        zone: 'attack-right',
+        activePlayers: { ballCarrier: players.cornerTaker?.name, primary: players.headerPlayer?.name }
+      });
+    } else {
+      events.push({
+        minute, type: 'position_lost', team: defendingTeam,
+        description: `Pozisyon ${defendingTeam === 'home' ? homeTeamName : awayTeamName} tarafından temizlendi`,
+        zone: 'defense-center'
+      });
+    }
+  };
 
   for (let minute = 1; minute <= 90; minute++) {
-    // Yarı zaman
+    // ── Yarı zaman ──
     if (minute === 45) {
+      activeScenario = null;
       events.push({ minute: 45, type: 'half', description: '⏸️ İlk Yarı Sonu', zone: 'midfield-center' });
       continue;
     }
 
-    // Dakika bazlı olay olasılığı
-    const eventProb = getMinuteEventProbability(minute);
+    // ── Aktif senaryo varsa → sonraki adımı yayınla ──
+    if (activeScenario) {
+      const sc = activeScenario;
+      const step = sc.step;
 
-    if (Math.random() < eventProb) {
-      const homeStrength = calculateTeamStrength(homeSquad, homeManager, [], [], true);
-      const awayStrength = calculateTeamStrength(awaySquad, awayManager, [], [], false);
+      if (step < sc.scenario.steps.length) {
+        const desc = buildStepDescription(sc.scenario.steps[step], sc.players, sc.attackingTeam, sc.defendingTeam);
+        events.push({
+          minute, type: 'position', team: sc.attackingTeam,
+          description: desc, step: step + 1, totalSteps: sc.scenario.steps.length,
+          zone: sc.zones[step] || 'midfield-center',
+          scenarioName: sc.scenario.name,
+          activePlayers: {
+            ballCarrier: getBallCarrierForStep(sc.scenario.name, step, sc.players),
+            primary: sc.players.attackingPlayer?.name,
+            secondary: getSecondaryPlayer(sc.scenario.name, step, sc.players),
+            goalkeeper: sc.players.goalkeeper?.name
+          }
+        });
+        sc.step++;
+      }
 
-      const totalStrength = homeStrength + awayStrength;
-      const homeChance = homeStrength / totalStrength;
+      // Son adım tamamlandıysa → sonuç üret
+      if (sc.step >= sc.scenario.steps.length) {
+        emitScenarioOutcome(minute, sc);
+        activeScenario = null;
+      }
+    }
+    // ── Aktif senaryo yok → yeni senaryo başlat veya idle yayınla ──
+    else {
+      const eventProb = getMinuteEventProbability(minute);
+      const canStart = minute < 42 || (minute > 45 && minute < 87);
 
-      // Momentum etkisi
-      const homeMomentum = calculateMomentum(
-        simHomeScore - simAwayScore,
-        lastGoalTeam === 'home' && lastGoalMinute ? minute - lastGoalMinute : null,
-        true
-      );
-      const adjustedHomeChance = Math.max(0.2, Math.min(0.8, homeChance + homeMomentum * 0.1));
-      const attackingTeam = Math.random() < adjustedHomeChance ? 'home' : 'away';
-      const defendingTeam = attackingTeam === 'home' ? 'away' : 'home';
+      if (canStart && Math.random() < eventProb) {
+        // Yeni senaryo başlat
+        const homeStrength = calculateTeamStrength(homeSquad, homeManager, [], [], true);
+        const awayStrength = calculateTeamStrength(awaySquad, awayManager, [], [], false);
+        const totalStrength = homeStrength + awayStrength;
+        const homeChance = homeStrength / totalStrength;
 
-      // Taktik ağırlıklı senaryo seç
-      const attackingManager = attackingTeam === 'home' ? homeManager : awayManager;
-      const scenario = selectWeightedScenarioWithTactic(getStyle(attackingManager));
+        const homeMomentum = calculateMomentum(
+          simHomeScore - simAwayScore,
+          lastGoalTeam === 'home' && lastGoalMinute ? minute - lastGoalMinute : null,
+          true
+        );
+        const adjustedHomeChance = Math.max(0.2, Math.min(0.8, homeChance + homeMomentum * 0.1));
+        const attackingTeam = Math.random() < adjustedHomeChance ? 'home' : 'away';
+        const defendingTeam = attackingTeam === 'home' ? 'away' : 'home';
 
-      const attackingSquad = attackingTeam === 'home' ? homeSquad : awaySquad;
-      const defendingSquad = defendingTeam === 'home' ? homeSquad : awaySquad;
+        const attackingMgr = attackingTeam === 'home' ? homeManager : awayManager;
+        const scenario = selectWeightedScenarioWithTactic(getStyle(attackingMgr));
+        const attackingSquad = attackingTeam === 'home' ? homeSquad : awaySquad;
+        const defendingSquad = defendingTeam === 'home' ? homeSquad : awaySquad;
 
-      if (attackingSquad && defendingSquad) {
-        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-        const byPos = (squad, pos) => squad.firstTeam.filter(p => p.position === pos);
+        if (attackingSquad && defendingSquad && attackingSquad.firstTeam.length > 0 && defendingSquad.firstTeam.length > 0) {
+          const players = buildPlayers(attackingSquad, defendingSquad);
+          const zones = SCENARIO_ZONES[scenario.name] || ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'];
 
-        const players = {
-          attackingPlayer: pick(attackingSquad.firstTeam),
-          defendingPlayer: pick(defendingSquad.firstTeam),
-          midfielder: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
-          goalkeeper: byPos(defendingSquad, 'K')[0] || defendingSquad.firstTeam[0],
-          cornerTaker: pick(attackingSquad.firstTeam),
-          freeKickTaker: pick(attackingSquad.firstTeam),
-          passer: pick(attackingSquad.firstTeam),
-          headerPlayer: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
-          winger: pick(byPos(attackingSquad, 'O')) || attackingSquad.firstTeam[0],
-          striker: pick(byPos(attackingSquad, 'F')) || attackingSquad.firstTeam[0],
-          passer1: pick(attackingSquad.firstTeam),
-          passer2: pick(attackingSquad.firstTeam),
-          passer3: pick(attackingSquad.firstTeam)
-        };
-
-        // Saha bölgesi haritası
-        const zones = SCENARIO_ZONES[scenario.name] || ['midfield-center', 'midfield-center', 'attack-center', 'attack-center'];
-
-        // Pozisyon adımlarını oluştur
-        for (let step = 0; step < scenario.steps.length; step++) {
-          let description = scenario.steps[step];
-          Object.keys(players).forEach(key => {
-            const player = players[key];
-            if (player && player.name) {
-              description = description.replace(`{${key}}`, player.name);
-            }
-          });
-          description = description.replace('{attackingTeam}', attackingTeam === 'home' ? homeTeamName : awayTeamName);
-          description = description.replace('{defendingTeam}', defendingTeam === 'home' ? homeTeamName : awayTeamName);
-
+          // İlk adımı hemen yayınla
+          const desc = buildStepDescription(scenario.steps[0], players, attackingTeam, defendingTeam);
           events.push({
             minute, type: 'position', team: attackingTeam,
-            description, step: step + 1, totalSteps: scenario.steps.length,
-            zone: zones[step] || 'midfield-center',
-            scenarioName: scenario.name
+            description: desc, step: 1, totalSteps: scenario.steps.length,
+            zone: zones[0] || 'midfield-center',
+            scenarioName: scenario.name,
+            activePlayers: {
+              ballCarrier: getBallCarrierForStep(scenario.name, 0, players),
+              primary: players.attackingPlayer?.name,
+              secondary: getSecondaryPlayer(scenario.name, 0, players),
+              goalkeeper: players.goalkeeper?.name
+            }
           });
+
+          // Tek adımlık senaryo → hemen sonuçla
+          if (scenario.steps.length <= 1) {
+            emitScenarioOutcome(minute, { scenario, players, attackingTeam, defendingTeam, zones, step: 1 });
+          } else {
+            activeScenario = { scenario, players, attackingTeam, defendingTeam, zones, step: 1 };
+          }
         }
-
-        // Pozisyon sonucu — momentum bazlı gol olasılığı
-        const attackingStrength = calculateTeamStrength(
-          attackingSquad, attackingManager, [], [], attackingTeam === 'home'
-        );
-        const defendingStrength = calculateTeamStrength(
-          defendingSquad, defendingTeam === 'home' ? homeManager : awayManager, [], [], defendingTeam === 'home'
-        );
-
-        const attackMomentum = calculateMomentum(
-          attackingTeam === 'home' ? simHomeScore - simAwayScore : simAwayScore - simHomeScore,
-          lastGoalTeam === attackingTeam && lastGoalMinute ? minute - lastGoalMinute : null,
-          attackingTeam === 'home'
-        );
-        const goalProb = calculateGoalProbability(attackingStrength, defendingStrength, attackMomentum, minute);
-        const cornerProb = goalProb + 0.20;
-        const random = Math.random();
-
-        if (random < goalProb) {
-          const scorer = pick(attackingSquad.firstTeam);
-          events.push({
-            minute, type: 'goal', team: attackingTeam,
-            description: `⚽ GOL! ${attackingTeam === 'home' ? homeTeamName : awayTeamName}li ${scorer ? scorer.name : 'Oyuncu'} gol attı!`,
-            player: scorer ? scorer.name : 'Oyuncu',
-            zone: 'attack-center'
-          });
-          if (attackingTeam === 'home') simHomeScore++;
-          else simAwayScore++;
-          lastGoalMinute = minute;
-          lastGoalTeam = attackingTeam;
-        } else if (random < cornerProb) {
-          events.push({
-            minute, type: 'corner', team: attackingTeam,
-            description: `Korner vuruşu ${attackingTeam === 'home' ? homeTeamName : awayTeamName} için`,
-            zone: 'attack-right'
-          });
+      } else {
+        // Dolgu veya idle olay
+        if (Math.random() < 0.2) {
+          // Dolgu (save, offside, foul, throw_in)
+          const team = Math.random() < 0.5 ? 'home' : 'away';
+          const squad = team === 'home' ? homeSquad : awaySquad;
+          const opponentSquad = team === 'home' ? awaySquad : homeSquad;
+          const teamName = team === 'home' ? homeTeamName : awayTeamName;
+          if (squad && opponentSquad && squad.firstTeam.length > 0 && opponentSquad.firstTeam.length > 0) {
+            const fillerEvent = generateFillerEvent(minute, team, squad, teamName, opponentSquad);
+            fillerEvent.zone = pick(IDLE_ZONES_POOL);
+            fillerEvent.activePlayers = { ballCarrier: pick(squad.firstTeam)?.name };
+            events.push(fillerEvent);
+          }
         } else {
+          // Idle (topa sahiplik dolaşımı)
+          const team = Math.random() < 0.5 ? 'home' : 'away';
+          const squad = team === 'home' ? homeSquad : awaySquad;
+          const teamName = team === 'home' ? homeTeamName : awayTeamName;
+          const player = squad ? pick(squad.firstTeam) : null;
+          const zone = pick(IDLE_ZONES_POOL);
+
+          let desc = pick(IDLE_DESCRIPTIONS);
+          desc = desc.replace('{team}', teamName);
+          desc = desc.replace('{player}', player?.name || 'Oyuncu');
+
           events.push({
-            minute, type: 'position_lost', team: defendingTeam,
-            description: `Pozisyon ${defendingTeam === 'home' ? homeTeamName : awayTeamName} tarafından temizlendi`,
-            zone: 'defense-center'
+            minute, type: 'idle', team,
+            description: desc, zone,
+            activePlayers: player ? { ballCarrier: player.name } : null
           });
         }
       }
     }
-    // Dolgu olayları (atmosfer: save, offside, foul, throw_in)
-    else if (Math.random() < 0.08) {
-      const team = Math.random() < 0.5 ? 'home' : 'away';
-      const squad = team === 'home' ? homeSquad : awaySquad;
-      const opponentSquad = team === 'home' ? awaySquad : homeSquad;
-      const teamName = team === 'home' ? homeTeamName : awayTeamName;
-      if (squad && opponentSquad && squad.firstTeam.length > 0 && opponentSquad.firstTeam.length > 0) {
-        const fillerEvent = generateFillerEvent(minute, team, squad, teamName, opponentSquad);
-        fillerEvent.zone = 'midfield-center';
-        events.push(fillerEvent);
-      }
-    }
 
-    // Diğer olaylar (kart, sakatlık)
+    // ── Kart ve sakatlık olayları (her dakika bağımsız) ──
     const cardRandom = Math.random();
-
-    // İkinci yarı yorgunluk bölgesi: sakatlık ihtimali artar
     const injuryThreshold = (minute >= 60 && minute <= 80) ? 0.055 : 0.035;
 
     if (cardRandom < 0.015) {
@@ -904,7 +1201,6 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
       const teamName = team === 'home' ? homeTeamName : awayTeamName;
       const squad = team === 'home' ? homeSquad : awaySquad;
       const player = squad ? squad.firstTeam[Math.floor(Math.random() * squad.firstTeam.length)] : null;
-
       events.push({
         minute, type: 'yellow', team,
         description: `🟨 ${teamName}li ${player ? player.name : 'Oyuncu'} sert müdahalesi nedeniyle sarı kart gördü!`,
@@ -915,7 +1211,6 @@ export const simulateMatch = (homeSquad, awaySquad, homeManager, awayManager, ho
       const teamName = team === 'home' ? homeTeamName : awayTeamName;
       const squad = team === 'home' ? homeSquad : awaySquad;
       const player = squad ? squad.firstTeam[Math.floor(Math.random() * squad.firstTeam.length)] : null;
-
       events.push({
         minute, type: 'red', team,
         description: `🟥 ${teamName}li ${player ? player.name : 'Oyuncu'} çok sert müdahalesi nedeniyle kırmızı kart gördü!`,

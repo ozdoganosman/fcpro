@@ -10,6 +10,7 @@ import {
 } from '../engine/matchEngine';
 import MatchScoreboard from './match/MatchScoreboard';
 import MatchControls from './match/MatchControls';
+import Match2DPitch from './match/Match2DPitch';
 import MatchEventLog from './match/MatchEventLog';
 import TeamSquadPanel from './match/TeamSquadPanel';
 import MatchStatsPanel from './match/MatchStatsPanel';
@@ -221,7 +222,7 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
 
   return (
     <div className="fc-modal-backdrop">
-      <div className="fc-modal" style={{ maxWidth: '620px', maxHeight: '90vh', overflow: 'hidden', position: 'relative' }}>
+      <div className="fc-modal" style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'hidden', position: 'relative' }}>
         <MatchScoreboard
           homeTeam={homeTeam}
           awayTeam={awayTeam}
@@ -234,7 +235,7 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
           showGoalOverlay={!!showGoalOverlay}
         />
 
-        <div className="fc-panel" style={{ padding: '15px 20px' }}>
+        <div className="fc-panel" style={{ padding: '15px 20px', overflowY: 'auto', maxHeight: 'calc(90vh - 100px)' }}>
           <MatchControls
             isPlaying={isPlaying}
             matchEnded={matchEnded}
@@ -246,39 +247,65 @@ const MatchPlayModal = ({ setShowMatchPlay, club, matchData, onMatchEnd, playerE
           />
 
           <div style={{ marginBottom: '10px' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1.5fr 1fr',
-              gap: '10px',
-              height: '430px'
-            }}>
-              {ms && (
-                <>
+            {ms && (
+              <>
+                {/* 2D Saha */}
+                <Match2DPitch
+                  currentZone={ms.currentZone}
+                  currentAttackingTeam={ms.currentAttackingTeam}
+                  homeSquad={ms.homeSquad}
+                  awaySquad={ms.awaySquad}
+                  scenarioName={ms.currentScenarioName}
+                  step={ms.currentStep}
+                  activePlayers={ms.activePlayers}
+                  eventType={matchEvents.length > 0 ? matchEvents[matchEvents.length - 1].type : null}
+                />
+
+                {/* Olay altyazısı */}
+                {matchEvents.length > 0 && (
+                  <div style={{
+                    background: 'rgba(0,0,0,0.75)', color: '#fff',
+                    padding: '6px 14px', borderRadius: '0 0 8px 8px',
+                    fontSize: '13px', textAlign: 'center',
+                    minHeight: '28px', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    marginTop: '-8px', position: 'relative', zIndex: 1
+                  }}>
+                    <span style={{ color: '#FFD700', fontWeight: 'bold', marginRight: '8px', fontSize: '12px' }}>
+                      {matchEvents[matchEvents.length - 1].minute}&apos;
+                    </span>
+                    <span>{matchEvents[matchEvents.length - 1].description}</span>
+                  </div>
+                )}
+
+                {/* Alt grid: Kadro | Olay Log | Kadro */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 2fr 1fr',
+                  gap: '8px',
+                  marginTop: '8px',
+                  height: '180px'
+                }}>
                   <TeamSquadPanel
                     teamName={homeTeam}
                     matchState={ms}
                     isHome={true}
                     manager={homeManagerRef.current}
                   />
-                  <MatchEventLog
-                    events={matchEvents}
-                    currentZone={ms.currentZone}
-                  />
+                  <MatchEventLog events={matchEvents.filter(e => e.type !== 'idle')} />
                   <TeamSquadPanel
                     teamName={awayTeam}
                     matchState={ms}
                     isHome={false}
                     manager={awayManagerRef.current}
                   />
-                </>
-              )}
-            </div>
+                </div>
 
-            {ms && (
-              <MatchStatsPanel
-                stats={ms.stats}
-                matchEnded={matchEnded}
-              />
+                <MatchStatsPanel
+                  stats={ms.stats}
+                  matchEnded={matchEnded}
+                />
+              </>
             )}
           </div>
         </div>
