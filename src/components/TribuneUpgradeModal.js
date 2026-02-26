@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const TribuneUpgradeModal = ({ setShowTribuneUpgrade, selectedTribune, club }) => {
+const TribuneUpgradeModal = ({ setShowTribuneUpgrade, selectedTribune, club, setClub }) => {
   const [newCapacity, setNewCapacity] = useState(selectedTribune.capacity);
   const [buildSpeed, setBuildSpeed] = useState('slow');
 
@@ -26,9 +26,9 @@ const TribuneUpgradeModal = ({ setShowTribuneUpgrade, selectedTribune, club }) =
 
   const handleRebuild = () => {
     if (buildCost <= club.money && newCapacity > selectedTribune.capacity) {
-      club.money -= buildCost; // Para düşüldü
+      setClub(prev => ({ ...prev, money: prev.money - buildCost }));
       selectedTribune.capacity = newCapacity;
-      alert(`${selectedTribune.name} kapasitesi ${newCapacity} olarak güncellendi! Kalan bakiye: ${club.money.toLocaleString()} TL`);
+      alert(`${selectedTribune.name} kapasitesi ${newCapacity} olarak güncellendi! Kalan bakiye: ${(club.money - buildCost).toLocaleString()} TL`);
       setShowTribuneUpgrade(false);
     } else if (newCapacity === selectedTribune.capacity) {
       alert('Tribün zaten mevcut kapasitede.');
@@ -315,6 +315,7 @@ TribuneUpgradeModal.propTypes = {
   setShowTribuneUpgrade: PropTypes.func.isRequired,
   selectedTribune: PropTypes.object.isRequired,
   club: PropTypes.object.isRequired,
+  setClub: PropTypes.func.isRequired,
 };
 
 export default TribuneUpgradeModal;

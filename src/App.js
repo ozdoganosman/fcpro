@@ -432,14 +432,14 @@ function App() {
     const allTeams = [];
     Object.values(turkishLeagues).forEach(league => {
       league.forEach(team => {
-        if (team !== club.name) {
-          allTeams.push(team);
+        if (team.name !== club.name) {
+          allTeams.push(team.name);
         }
       });
     });
-    
+
     const randomTeam = allTeams[Math.floor(Math.random() * allTeams.length)];
-    
+
     // Yeni hazırlık maçını fikstüre ekle
     const newFixture = {
       homeTeam: club.name,
@@ -782,19 +782,21 @@ function App() {
             }}
             onShowPitchImprovement={() => setShowPitchImprovement(true)}
           />}
-          {showPitchImprovement && <PitchImprovementModal 
+          {showPitchImprovement && <PitchImprovementModal
             setShowPitchImprovement={setShowPitchImprovement}
             club={club}
+            setClub={setClub}
             onShowStadium={() => setShowStadium(true)}
           />}
           {showStadiumFacilities && <StadiumFacilitiesModal 
             setShowStadiumFacilities={setShowStadiumFacilities}
             onShowStadium={() => setShowStadium(true)}
           />}
-          {showTribuneUpgrade && <TribuneUpgradeModal 
+          {showTribuneUpgrade && <TribuneUpgradeModal
             setShowTribuneUpgrade={setShowTribuneUpgrade}
             selectedTribune={selectedTribune}
             club={club}
+            setClub={setClub}
           />}
           {showMatchPlay && <MatchPlayModal 
             setShowMatchPlay={setShowMatchPlay}
@@ -896,8 +898,8 @@ function App() {
                 // Tüm takımların oyuncularının enerjilerini güncelle
                 Object.keys(turkishLeagues).forEach(leagueName => {
                   const teams = turkishLeagues[leagueName];
-                  teams.forEach(teamName => {
-                    const teamKey = `${leagueName}_${teamName}`;
+                  teams.forEach(team => {
+                    const teamKey = `${leagueName}_${team.name}`;
                     if (newEnergies[teamKey]) {
                       newEnergies[teamKey] = newEnergies[teamKey].map(player => ({
                         ...player,

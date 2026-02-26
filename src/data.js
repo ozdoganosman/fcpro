@@ -406,51 +406,6 @@ export const createClubData = async (selectedTeam, leagueName) => {
     }
   };
   
-  // Menajer oluşturma fonksiyonu
-  const generateManager = (teamValue) => {
-    // Takım değerine göre menajer seviyesi belirle
-    let baseLevel;
-    if (teamValue >= 100) baseLevel = Math.floor(Math.random() * 20) + 80; // 80-99
-    else if (teamValue >= 50) baseLevel = Math.floor(Math.random() * 20) + 60; // 60-79
-    else if (teamValue >= 20) baseLevel = Math.floor(Math.random() * 20) + 40; // 40-59
-    else if (teamValue >= 10) baseLevel = Math.floor(Math.random() * 20) + 30; // 30-49
-    else baseLevel = Math.floor(Math.random() * 20) + 20; // 20-39
-
-    // M-A-T seviyelerini oluştur (ortalaması baseLevel olacak)
-    const variation = Math.floor(Math.random() * 10) - 5; // ±5 varyasyon
-    const managerLevel = Math.max(20, Math.min(99, baseLevel + variation));
-    const trainingLevel = Math.max(20, Math.min(99, baseLevel + Math.floor(Math.random() * 10) - 5));
-    const tacticsLevel = Math.max(20, Math.min(99, baseLevel + Math.floor(Math.random() * 10) - 5));
-
-    // Futbol anlayışını belirle
-    const philosophies = Object.values(FOOTBALL_PHILOSOPHIES);
-    const philosophy = philosophies[Math.floor(Math.random() * philosophies.length)];
-    
-    // Anlayışa göre taktik seç
-    let formation;
-    switch (philosophy) {
-      case FOOTBALL_PHILOSOPHIES.ATTACKING:
-        formation = FORMATIONS.ATTACKING[Math.floor(Math.random() * FORMATIONS.ATTACKING.length)];
-        break;
-      case FOOTBALL_PHILOSOPHIES.BALANCED:
-        formation = FORMATIONS.BALANCED[Math.floor(Math.random() * FORMATIONS.BALANCED.length)];
-        break;
-      case FOOTBALL_PHILOSOPHIES.DEFENSIVE:
-        formation = FORMATIONS.DEFENSIVE[Math.floor(Math.random() * FORMATIONS.DEFENSIVE.length)];
-        break;
-    }
-
-    return {
-      name: generateManagerName(),
-      managerLevel: managerLevel,
-      trainingLevel: trainingLevel,
-      tacticsLevel: tacticsLevel,
-      level: Math.round((managerLevel + trainingLevel + tacticsLevel) / 3), // Ortalama seviye
-      philosophy: philosophy,
-      formation: formation
-    };
-  };
-
       return {
       name: selectedTeam,
       season: '2024/25',
@@ -460,7 +415,7 @@ export const createClubData = async (selectedTeam, leagueName) => {
       lig: team ? team.position : Math.floor(Math.random() * 20) + 1,
       money: 50000, // Sabit başlangıç parası
              kadro: getTeamValue(selectedTeam), // Doğru kadro değeri
-       menajer: (await generateManager(getTeamValue(selectedTeam), leagueName)).level,
+       menajer: (await generateManager(getTeamValue(selectedTeam), leagueName)).averageSkill,
       antrenman: await getFacilityLevel(selectedTeam),
       altyapi: await getFacilityLevel(selectedTeam),
       kupalar: 0,
@@ -537,20 +492,6 @@ export const standingsData = [
   { pos: 8, team: 'OLOT', O: 5, G: 2, B: 2, M: 1, A: 4, Y: 3, AV: 1, PN: 8 },
   { pos: 9, team: 'VILLARROBLED', O: 5, G: 2, B: 1, M: 2, A: 6, Y: 6, AV: 0, PN: 7 },
 ];
-
-// Menajer futbol anlayışları
-const FOOTBALL_PHILOSOPHIES = {
-  ATTACKING: 'Hücum Futbolu',
-  BALANCED: 'Dengeli',
-  DEFENSIVE: 'Savunma Futbolu'
-};
-
-// Taktik formasyonları
-const FORMATIONS = {
-  ATTACKING: ['4-4-2', '3-4-3', '4-3-3'],
-  BALANCED: ['4-5-1', '3-5-2'],
-  DEFENSIVE: ['5-4-1', '5-3-2']
-};
 
 // Menajer ismi oluşturma
 const generateManagerName = () => {
